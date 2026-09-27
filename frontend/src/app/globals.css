@@ -1,0 +1,332 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   TEL Education Link — design tokens
+  Light-first, cool institutional canvas, deep navy ink, restrained teal accent.
+  Every value used anywhere in the app comes from here.
+   ========================================================================== */
+
+@theme {
+  /* --- Typography ------------------------------------------------------ */
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-manrope), var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --text-display: clamp(2rem, 1.35rem + 2.4vw, 2.875rem);
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.02em;
+
+  --text-h1: clamp(1.5rem, 1.25rem + 1vw, 1.875rem);
+  --text-h1--line-height: 1.18;
+  --text-h1--letter-spacing: -0.015em;
+
+  --text-h2: 1.3125rem;
+  --text-h2--line-height: 1.28;
+  --text-h2--letter-spacing: -0.01em;
+
+  --text-h3: 1.0625rem;
+  --text-h3--line-height: 1.36;
+
+  --text-body-lg: 1.0625rem;
+  --text-body-lg--line-height: 1.68;
+
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.65;
+
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.55;
+
+  --text-caption: 0.6875rem;
+  --text-caption--line-height: 1.45;
+  --text-caption--letter-spacing: 0.08em;
+
+  /* --- Surfaces -------------------------------------------------------- */
+  --color-canvas: #f4f7f8;
+  --color-canvas-deep: #e8eef1;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f6f5f0;
+  --color-surface-mint: #eef4ee;
+  --color-surface-sunken: #f1efe7;
+
+  /* --- Ink ------------------------------------------------------------- */
+  --color-ink: #102a43;
+  --color-ink-soft: #486078;
+  --color-ink-muted: #6d8294;
+  --color-ink-faint: #9aabb8;
+  --color-ink-inverse: #f7fbfc;
+
+  /* --- Lines ----------------------------------------------------------- */
+  --color-line: #dce5e9;
+  --color-line-soft: #e8eef1;
+  --color-line-strong: #c6d3da;
+
+  /* --- Brand / status --------------------------------------------------- */
+  --color-brand: #087e8b;
+  --color-brand-deep: #075c66;
+  --color-brand-soft: #ccecef;
+  --color-brand-tint: #eaf7f8;
+  --color-success: #217a5b;
+  --color-success-soft: #dfeee4;
+  --color-warning: #9a6b1f;
+  --color-warning-soft: #f6ebd7;
+  --color-danger: #9d3b2c;
+  --color-danger-soft: #f7e3de;
+  --color-info: #35627f;
+  --color-info-soft: #e0ebf2;
+
+  /* --- Subject accent tokens (stable per subject, set by the API) -------- */
+  --color-subject-sage: #3f7359;
+  --color-subject-sage-soft: #e3eee6;
+  --color-subject-mint: #3b7f6b;
+  --color-subject-mint-soft: #dff0ea;
+  --color-subject-sky: #3c6b85;
+  --color-subject-sky-soft: #e0ecf2;
+  --color-subject-sand: #8a6a2c;
+  --color-subject-sand-soft: #f4ecd9;
+  --color-subject-clay: #93583f;
+  --color-subject-clay-soft: #f4e6df;
+  --color-subject-lilac: #5f5a86;
+  --color-subject-lilac-soft: #eae8f2;
+
+  /* --- Radius: consistently rounded curves throughout --- */
+  --radius-control: 0.75rem;
+  --radius-card: 1.5rem;
+  --radius-panel: 1.75rem;
+  --radius-pill: 999px;
+
+  /* --- Elevation: soft, flat shadows without hard edges --- */
+  --shadow-hairline: 0 1px 3px rgba(16, 42, 67, 0.06);
+  --shadow-soft: 0 2px 4px rgba(16, 42, 67, 0.05), 0 8px 16px -6px rgba(16, 42, 67, 0.08);
+  --shadow-raised: 0 4px 6px rgba(16, 42, 67, 0.05), 0 16px 32px -12px rgba(16, 42, 67, 0.12);
+  --shadow-overlay: 0 12px 24px -8px rgba(16, 42, 67, 0.14), 0 32px 64px -24px rgba(16, 42, 67, 0.20);
+  --shadow-focus: 0 0 0 3px rgba(8, 126, 139, 0.22);
+
+  /* --- Motion ----------------------------------------------------------- */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-fade-up: fade-up 0.42s var(--ease-out-soft) both;
+  --animate-fade-in: fade-in 0.24s ease-out both;
+  --animate-scale-in: scale-in 0.18s var(--ease-out-soft) both;
+  --animate-slide-in: slide-in 0.26s var(--ease-out-soft) both;
+  --animate-progress: progress 0.9s var(--ease-out-soft) both;
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes shimmer {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-12px) translateX(6px); }
+  50% { transform: translateY(6px) translateX(-8px); }
+  75% { transform: translateY(-8px) translateX(4px); }
+}
+@keyframes blob {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: translate(0, 0) scale(1); }
+  25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: translate(20px, -20px) scale(1.05); }
+  50% { border-radius: 50% 30% 60% 50% / 30% 50% 60% 40%; transform: translate(-15px, 25px) scale(0.95); }
+  75% { border-radius: 40% 50% 30% 60% / 60% 40% 50% 30%; transform: translate(10px, 15px) scale(1.02); }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  :root {
+    --sidebar-width: 16.5rem;
+    --topbar-height: 4rem;
+    color-scheme: light;
+  }
+
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  p { text-wrap: pretty; }
+
+  /* Visible, consistent focus for every interactive element. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--color-brand-soft);
+    color: var(--color-brand-deep);
+  }
+
+  /* Scrollbars kept quiet and in-theme. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line-strong);
+    border-radius: var(--radius-pill);
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background-color: var(--color-ink-faint); background-clip: content-box; }
+}
+
+@layer components {
+  /* Subtle mint wash used to lift a section off the canvas without a shadow. */
+  .surface-tint {
+    background:
+      radial-gradient(120% 140% at 0% 0%, #f1f7f1 0%, rgba(250, 249, 245, 0) 62%),
+      var(--color-surface);
+  }
+
+  .hairline-bottom {
+    box-shadow: inset 0 -1px 0 var(--color-line);
+  }
+
+  /* Progress bars grow from the left using a transform so they animate cheaply. */
+  .meter {
+    transform-origin: left center;
+  }
+
+  /* Floating animations for educational backgrounds */
+  .animate-float {
+    animation: float 20s ease-in-out infinite;
+  }
+  .animate-blob {
+    animation: blob 25s ease-in-out infinite;
+  }
+  .animate-fade-in-up {
+    animation: fade-up 0.6s var(--ease-out-soft) both;
+  }
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out both;
+  }
+  .animate-stagger-1 { animation-delay: 0.1s; }
+  .animate-stagger-2 { animation-delay: 0.2s; }
+  .animate-stagger-3 { animation-delay: 0.3s; }
+  .animate-stagger-4 { animation-delay: 0.4s; }
+  .animate-stagger-5 { animation-delay: 0.5s; }
+  .animate-stagger-6 { animation-delay: 0.6s; }
+
+  /* 3D card hover effect */
+  .card-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.3s var(--ease-out-soft), box-shadow 0.3s var(--ease-out-soft);
+  }
+  .card-3d:hover {
+    transform: translateY(-4px) rotateX(1deg);
+    box-shadow: var(--shadow-raised);
+  }
+
+  /* Glassmorphism effect for special cards */
+  .glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Smooth page transitions */
+  .page-enter {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  .page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s var(--ease-out-soft), transform 0.4s var(--ease-out-soft);
+  }
+
+  /* Professional link hover effects */
+  .link-hover {
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+  }
+  .link-hover:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Utilities that Tailwind does not provide but the design language needs. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+@utility transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+
+@utility rounded-panel {
+  border-radius: var(--radius-panel);
+}
+
+@utility bg-hero-gradient {
+  background: radial-gradient(120% 140% at 0% 0%, var(--color-surface-mint) 0%, var(--color-canvas) 60%);
+}
+
+@utility shadow-intense {
+  box-shadow: 0 8px 16px -6px rgba(26, 31, 27, 0.08), 0 24px 48px -12px rgba(26, 31, 27, 0.14);
+}
+
+@utility glass-card {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  box-shadow: 0 8px 32px 0 rgba(26, 31, 27, 0.07);
+}
