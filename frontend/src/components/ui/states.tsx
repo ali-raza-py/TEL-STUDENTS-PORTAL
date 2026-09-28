@@ -40,7 +40,7 @@ export function EmptyState({
       <span className="flex h-11 w-11 items-center justify-center rounded-pill bg-brand-tint text-brand">
         {icon ?? <Inbox className="h-5 w-5" aria-hidden />}
       </span>
-      <p className="font-display text-h3 text-ink">{title}</p>
+      <p className="font-display text-h3 font-semibold text-ink">{title}</p>
       {description ? (
         <p className="max-w-sm text-small text-ink-muted">{description}</p>
       ) : null}
@@ -84,11 +84,26 @@ function errorHeadline(error: ApiError): { title: string; description: string; i
       icon: <Inbox className="h-5 w-5" aria-hidden />,
     };
   }
+  if (error.status === 429) {
+    const wait = Number(error.details.retry_after ?? 0);
+    return {
+      title: "Too many attempts",
+      description: wait
+        ? `Please wait ${formatWait(wait)} before trying again.`
+        : "Please wait a moment before trying again.",
+      icon: <AlertTriangle className="h-5 w-5" aria-hidden />,
+    };
+  }
   return {
     title: "Something went wrong",
     description: error.message || "Please try again in a moment.",
     icon: <AlertTriangle className="h-5 w-5" aria-hidden />,
   };
+}
+
+/** Renders a ``Retry-After`` hint as seconds or whole minutes. */
+function formatWait(seconds: number): string {
+  return seconds < 60 ? `${Math.ceil(seconds)} second${seconds < 2 ? "" : "s"}` : `${Math.ceil(seconds / 60)} minutes`;
 }
 
 export function ErrorState({
@@ -117,7 +132,7 @@ export function ErrorState({
           {icon}
         </span>
         <div className="min-w-0">
-          <p className="font-display text-h3 text-ink">{title}</p>
+          <p className="font-display text-h3 font-semibold text-ink">{title}</p>
           <p className="mt-1 text-small text-ink-soft">{description}</p>
           {error.traceId ? (
             <p className="mt-2 font-mono text-caption text-ink-faint">

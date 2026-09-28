@@ -15,7 +15,7 @@ import { subjectToken, formatPercent, formatMarks, formatDate, statusTone, grade
 import { useResource, useDebounced } from "@/lib/hooks/use-resource";
 import { endpoints } from "@/lib/endpoints";
 import type { ResultRow, Paginated } from "@/lib/types";
-import { FloatingOrbs, PageTransitionWrapper } from "@/components/education/education-components";
+import { PageTransitionWrapper } from "@/components/education/education-components";
 
 export default function ResultsPage() {
   const [search, setSearch] = useState("");
@@ -53,7 +53,6 @@ export default function ResultsPage() {
 
   return (
     <div className="relative min-h-[calc(100dvh-4rem)]">
-      <FloatingOrbs opacity={0.04} color="success" count={4} />
       <PageTransitionWrapper>
         <PageStack>
           <PageHeader
@@ -114,6 +113,8 @@ export default function ResultsPage() {
         </>
       )}
     </PageStack>
+    </PageTransitionWrapper>
+  </div>
   );
 }
 

@@ -10,7 +10,7 @@ import { useResource } from "@/lib/hooks/use-resource";
 import { endpoints } from "@/lib/endpoints";
 import type { TimetableResponse, TodayResponse, TimetableEntry } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { FloatingOrbs, PageTransitionWrapper } from "@/components/education/education-components";
+import { PageTransitionWrapper } from "@/components/education/education-components";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -31,7 +31,6 @@ export default function TimetablePage() {
 
   return (
     <div className="relative min-h-[calc(100dvh-4rem)]">
-      <FloatingOrbs opacity={0.04} color="info" count={4} />
       <PageTransitionWrapper>
         <PageStack>
           <PageHeader
@@ -91,7 +90,7 @@ export default function TimetablePage() {
             const dayEntries = groupByDay(timetableData.timetable!.entries, dayIndex + 1);
             return (
               <div key={day} className="space-y-2">
-                <p className="text-center text-caption font-semibold uppercase tracking-[0.07em] text-ink-faint">
+                <p className="text-center text-label font-bold uppercase text-ink-faint">
                   {day.slice(0, 3)}
                 </p>
                 {dayEntries.length === 0 ? (

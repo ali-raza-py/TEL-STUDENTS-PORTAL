@@ -128,7 +128,7 @@ export function NotificationBell() {
       aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}
     >
       <Link href="/notifications">
-        <Bell className={cn("h-[1.15rem] w-[1.15rem]", isActive && "text-brand")} aria-hidden />
+        <Bell className={cn("size-[1.125rem]", isActive && "text-brand")} aria-hidden />
         {unread > 0 ? (
           <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-pill bg-danger px-1 text-[0.5625rem] font-semibold text-white">
             {unread > 9 ? "9+" : unread}

@@ -9,6 +9,7 @@ import { Field, Input } from "@/components/ui/input";
 import { TelWordmark } from "@/components/layout/wordmark";
 import { ApiError } from "@/lib/api-client";
 import { endpoints } from "@/lib/endpoints";
+import { PageTransitionWrapper } from "@/components/education/education-components";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -32,21 +33,23 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main id="main" className="min-h-dvh bg-canvas px-5 py-10 sm:px-10">
-      <div className="mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-5xl flex-col">
+    <main id="main" className="relative min-h-dvh bg-hero-gradient px-5 py-10 sm:px-10">
+      <div className="relative z-10 mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-5xl flex-col">
         <TelWordmark size="md" />
         <div className="grid flex-1 items-center gap-12 py-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-24">
           <div className="hidden lg:block">
-            <p className="text-caption font-semibold uppercase tracking-[0.16em] text-brand">Account recovery</p>
-            <h1 className="mt-4 max-w-md font-display text-display text-ink">A fresh start is one email away.</h1>
-            <p className="mt-5 max-w-sm text-body-lg text-ink-muted">
-              Enter your institutional email and we will help you securely regain access.
-            </p>
+            <PageTransitionWrapper delay={0.2}>
+              <p className="text-label font-bold uppercase text-brand">Account recovery</p>
+              <h1 className="mt-4 max-w-md font-display text-display text-ink">A fresh start is one email away.</h1>
+              <p className="mt-5 max-w-sm text-body-lg text-ink-muted">
+                Enter your institutional email and we will help you securely regain access.
+              </p>
+            </PageTransitionWrapper>
           </div>
 
           <section className="w-full max-w-[28rem]">
             <div className="mb-8 lg:hidden">
-              <p className="text-caption font-semibold uppercase tracking-[0.16em] text-brand">Account recovery</p>
+              <p className="text-label font-bold uppercase text-brand">Account recovery</p>
               <h1 className="mt-3 font-display text-h1 text-ink">Reset your password</h1>
             </div>
             <div className="rounded-card border border-line bg-surface p-7 shadow-raised sm:p-9">
@@ -75,7 +78,7 @@ export default function ForgotPasswordPage() {
                     className="h-12 pl-10"
                   />
                 </Field>
-                <Button type="submit" block loading={isSubmitting} size="lg" className="h-12" icon={<ArrowRight className="h-4 w-4" />}>
+                <Button type="submit" block loading={isSubmitting} size="lg" className="h-12 shadow-raised" icon={<ArrowRight className="h-4 w-4" />}>
                   Send reset instructions
                 </Button>
               </form>

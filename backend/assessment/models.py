@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 from common.models import TimeStampedModel, UUIDPublicIdModel
@@ -35,6 +36,21 @@ class PaperStatus(models.TextChoices):
     PUBLISHED = "PUBLISHED", "Published"
     PRACTICE_AVAILABLE = "PRACTICE_AVAILABLE", "Available for practice"
     ARCHIVED = "ARCHIVED", "Archived"
+
+
+class VisibilityScope(models.TextChoices):
+    """Cross-campus visibility for practice papers.
+
+    PRIVATE: Only the owner campus's own class can access.
+    CAMPUS_ONLY: Any student at the owner campus can access.
+    SELECTED_CAMPUSES: Owner campus + explicitly listed campuses.
+    ALL_TEL: All TEL campuses can access.
+    """
+
+    PRIVATE = "PRIVATE", "Private (owner class only)"
+    CAMPUS_ONLY = "CAMPUS_ONLY", "Campus only"
+    SELECTED_CAMPUSES = "SELECTED_CAMPUSES", "Selected campuses"
+    ALL_TEL = "ALL_TEL", "All TEL campuses"
 
 
 #: Students only ever see papers in these states.
@@ -85,6 +101,15 @@ class Paper(TimeStampedModel, UUIDPublicIdModel):
     )
     teacher = models.ForeignKey(
         "accounts.User", on_delete=models.SET_NULL, related_name="papers", null=True
+    )
+
+    # Cross-campus sharing control. Only practice papers should use ALL_TEL or
+    # SELECTED_CAMPUSES. Academic papers remain PRIVATE by default.
+    visibility_scope = models.CharField(
+        max_length=20,
+        choices=VisibilityScope.choices,
+        default=VisibilityScope.PRIVATE,
+        db_index=True,
     )
 
     total_marks = models.PositiveSmallIntegerField(default=50)
@@ -151,6 +176,38 @@ class Paper(TimeStampedModel, UUIDPublicIdModel):
     @property
     def has_topic_metadata(self) -> bool:
         return self.questions.exclude(topic="").exclude(topic__isnull=True).exists()
+
+
+class PracticePaperCampus(models.Model):
+    """Explicit campus grants for SELECTED_CAMPUSES practice papers.
+
+    A paper with visibility_scope=SELECTED_CAMPUSES is visible to students at
+    the owner campus plus every campus listed here. This is a proper relationship
+    table rather than a comma-separated text field so sharing can be changed
+    without code changes.
+    """
+
+    paper = models.ForeignKey(
+        Paper, on_delete=models.CASCADE, related_name="shared_campuses"
+    )
+    campus = models.ForeignKey(
+        "academics.Campus", on_delete=models.CASCADE, related_name="shared_practice_papers"
+    )
+    granted_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, related_name="campus_grants", null=True
+    )
+    granted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("campus__name",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["paper", "campus"], name="uniq_paper_campus_grant"
+            )
+        ]
+
+    def __str__(self) -> str:  # pragma: no cover - display only
+        return f"{self.paper_id} → {self.campus.name}"
 
 
 class QuestionType(models.TextChoices):
@@ -402,3 +459,71 @@ class ResultPublication(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
+
+
+class LeaderboardScope(models.TextChoices):
+    """Possible visibility scopes for a leaderboard."""
+
+    CLASS = "CLASS", "Class"
+    SECTION = "SECTION", "Section"
+    CAMPUS = "CAMPUS", "Campus"
+    PROGRAM = "PROGRAM", "Program"
+    ACADEMIC_YEAR = "ACADEMIC_YEAR", "Academic Year"
+    SELECTED_CAMPUSES = "SELECTED_CAMPUSES", "Selected Campuses"
+    ALL_TEL = "ALL_TEL", "All TEL Education Link"
+
+
+class Leaderboard(models.Model):
+    """A practice leaderboard with explicit scope controls.
+
+    Visibility rules mirror those of practice papers. The backend must
+    enforce the selected scope so students only see authorized participants.
+    """
+
+    title = models.CharField(max_length=200)
+    paper = models.ForeignKey(
+        Paper, on_delete=models.CASCADE, related_name="leaderboards"
+    )
+    scope = models.CharField(max_length=20, choices=LeaderboardScope.choices, default=LeaderboardScope.CLASS)
+    campus = models.ForeignKey(
+        "academics.Campus", on_delete=models.CASCADE, related_name="leaderboards", null=True, blank=True
+    )
+    class_room = models.ForeignKey(
+        "academics.ClassRoom", on_delete=models.CASCADE, related_name="leaderboards", null=True, blank=True
+    )
+    section = models.ForeignKey(
+        "academics.Section", on_delete=models.CASCADE, related_name="leaderboards", null=True, blank=True
+    )
+    academic_year = models.ForeignKey(
+        "academics.AcademicYear", on_delete=models.CASCADE, related_name="leaderboards", null=True, blank=True
+    )
+    is_active = models.BooleanField(default=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        indexes = [models.Index(fields=["paper", "scope", "is_active"])]
+
+    def __str__(self) -> str:  # pragma: no cover - display only
+        return f"{self.title} ({self.scope})"
+
+    def get_scope_filter(self) -> Q:
+        """Returns a Q object that filters PracticeAttempts to the leaderboard scope."""
+        from django.db.models import Q
+
+        if self.scope == LeaderboardScope.CLASS:
+            return Q(paper__class_room_id=self.class_room_id)
+        elif self.scope == LeaderboardScope.SECTION:
+            return (
+                Q(paper__class_room_id=self.class_room_id)
+                & Q(paper__section_id=self.section_id)
+            )
+        elif self.scope == LeaderboardScope.CAMPUS:
+            return Q(paper__campus_id=self.campus_id)
+        elif self.scope == LeaderboardScope.PROGRAM:
+            return Q(paper__class_room__program_id=self.class_room.program_id)
+        elif self.scope == LeaderboardScope.ACADEMIC_YEAR:
+            return Q(paper__academic_year_id=self.academic_year_id)
+        elif self.scope == LeaderboardScope.ALL_TEL:
+            return Q()  # No filter needed, all practice attempts
+        return Q()

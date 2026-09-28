@@ -1,17 +1,22 @@
 "use client";
 
 import * as React from "react";
-import { BookOpen, GraduationCap, Award, Target, Lightbulb, Globe } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 
-const floatingElements = [
-  { icon: BookOpen, color: "bg-brand-tint", top: "5%", left: "3%", delay: "0s", size: 48 },
-  { icon: GraduationCap, color: "bg-success-soft", top: "15%", right: "5%", delay: "2s", size: 40 },
-  { icon: Award, color: "bg-warning-soft", top: "30%", left: "2%", delay: "4s", size: 36 },
-  { icon: Target, color: "bg-info-soft", bottom: "20%", right: "3%", delay: "1s", size: 44 },
-  { icon: Lightbulb, color: "bg-danger-soft", bottom: "10%", left: "5%", delay: "3s", size: 42 },
-  { icon: Globe, color: "bg-brand-soft", top: "50%", left: "50%", delay: "5s", size: 38 },
+/**
+ * Floating background.
+ *
+ * Soft, low-opacity educational glyphs drifting across the viewport. The
+ * opacity is deliberately low — these are atmosphere, not content — and they
+ * never intercept pointer events so they cannot break interaction.
+ */
+const FLOATING_ELEMENTS = [
+  { icon: "graduation", top: "5%", left: "3%", delay: "0s", size: 48 },
+  { icon: "book", top: "15%", right: "5%", delay: "2s", size: 40 },
+  { icon: "award", top: "30%", left: "2%", delay: "4s", size: 36 },
+  { icon: "target", bottom: "20%", right: "3%", delay: "1s", size: 44 },
+  { icon: "lightbulb", bottom: "10%", left: "5%", delay: "3s", size: 42 },
+  { icon: "globe", top: "50%", left: "50%", delay: "5s", size: 38 },
 ];
 
 export function FloatingEducationBackground({
@@ -29,32 +34,22 @@ export function FloatingEducationBackground({
       )}
       aria-hidden="true"
     >
-      {floatingElements.map(({ icon: Icon, color, top, right, bottom, left, delay, size }, i) => (
+      {FLOATING_ELEMENTS.map((el, i) => (
         <div
           key={i}
-          className={cn(
-            "absolute rounded-2xl shadow-2xl animate-float",
-            color,
-          )}
+          className="absolute rounded-2xl bg-brand-tint animate-float"
           style={{
             opacity,
-            animationDelay: delay,
-            width: size,
-            height: size,
-            top,
-            right,
-            bottom,
-            left,
+            animationDelay: el.delay,
+            width: el.size,
+            height: el.size,
+            top: el.top,
+            right: el.right,
+            bottom: el.bottom,
+            left: el.left,
           }}
         >
-          <Icon className="w-full h-full text-current opacity-50" aria-hidden />
-          <div
-            className="absolute inset-0 rounded-2xl"
-            style={{
-              boxShadow:
-                "inset 0 0 0 1px rgba(255,255,255,0.4), 0 0 12px 2px rgba(47,107,79,0.15)",
-            }}
-          />
+          <span className="block h-full w-full rounded-2xl bg-brand-tint" />
         </div>
       ))}
     </div>
@@ -82,49 +77,37 @@ export function FloatingOrbs({
     mint: "bg-subject-mint-soft",
   };
 
-  const glowRgb = {
-    brand: "47, 107, 79",
-    success: "44, 122, 85",
-    warning: "154, 107, 31",
-    danger: "157, 59, 44",
-    info: "53, 98, 127",
-    lilac: "95, 90, 134",
-    mint: "59, 127, 107",
-  };
-
   return (
     <div
-      className={cn("pointer-events-none absolute inset-0 overflow-hidden z-0 rounded-panel", className)}
+      className={cn("pointer-events-none absolute inset-0 overflow-hidden z-0", className)}
       aria-hidden="true"
     >
-      {Array.from({ length: count }).map((_, i) => {
-        const size = 40 + (i * 50) % 160;
-        const delay = i * 2;
-        const duration = 20 + i * 5;
-        return (
-          <div
-            key={i}
-            className={cn(
-              "absolute rounded-full animate-blob blur-[1px]",
-              colorClasses[color],
-            )}
-            style={{
-              opacity,
-              width: size,
-              height: size,
-              top: `${(i * 19) % 75}%`,
-              left: `${(i * 27) % 75}%`,
-              animationDelay: `${delay}s`,
-              animationDuration: `${duration}s`,
-              boxShadow: `0 0 20px 6px rgba(${glowRgb[color]}, 0.18)`,
-            }}
-          />
-        );
-      })}
+      {Array.from({ length: count }).map((_, i) => (
+        <div
+          key={i}
+          className={cn("absolute rounded-full animate-blob", colorClasses[color])}
+          style={{
+            opacity,
+            width: 40 + (i * 50) % 160,
+            height: 40 + (i * 50) % 160,
+            top: `${(i * 19) % 75}%`,
+            left: `${(i * 27) % 75}%`,
+            animationDelay: `${i * 2}s`,
+            animationDuration: `${20 + i * 5}s`,
+          }}
+        />
+      ))}
     </div>
   );
 }
 
+/**
+ * Page entrance.
+ *
+ * Opacity only — deliberately no `translateY`. A lingering transform from a
+ * `both`-filled animation would become the containing block for any
+ * `position: fixed` descendant, which silently breaks drawers and modals.
+ */
 export function PageTransitionWrapper({
   children,
   className,
@@ -136,8 +119,8 @@ export function PageTransitionWrapper({
 }) {
   return (
     <div
-      className={cn("animate-fade-in-up", className)}
-      style={delay ? { animationDelay: `${delay}s` } : undefined}
+      className={cn("animate-fade-in", className)}
+      style={delay > 0 ? { animationDelay: `${delay}s` } : undefined}
     >
       {children}
     </div>
@@ -161,49 +144,46 @@ export function EducationalCard({
 }) {
   const variants = {
     default: cn(
-      "bg-surface border border-line shadow-soft",
-      hover && "transition-all duration-300 hover:shadow-raised",
+      "bg-surface border border-line shadow-[var(--shadow-hairline)]",
+      hover && "transition-shadow hover:shadow-[var(--shadow-soft)]",
     ),
     elevated: cn(
-      "bg-surface border border-line shadow-raised",
-      hover && "transition-all duration-300 hover:shadow-overlay hover:-translate-y-1",
+      "bg-surface border border-line shadow-[var(--shadow-hairline)]",
+      hover && "transition-shadow hover:shadow-[var(--shadow-raised)]",
     ),
-    glass:
-      "bg-surface/70 backdrop-blur-xl border border-line-soft/50 shadow-soft",
-    "3d":
-      "bg-surface border border-line shadow-raised transform-gpu transform-style-preserve-3d",
+    glass: "bg-surface border border-line shadow-[var(--shadow-hairline)]",
+    "3d": "bg-surface border border-line shadow-[var(--shadow-soft)]",
   };
 
+  /* The icon renders as a plain glyph in a brand tint — no pastel square
+     behind it. Large colourful tiles read as decoration; a single tinted
+     glyph reads as a label. */
   const iconColors = {
-    brand: "bg-brand-tint text-brand",
-    success: "bg-success-soft text-success",
-    warning: "bg-warning-soft text-warning",
-    danger: "bg-danger-soft text-danger",
-    info: "bg-info-soft text-info",
-    lilac: "bg-subject-lilac-soft text-subject-lilac",
-    mint: "bg-subject-mint-soft text-subject-mint",
+    brand: "text-brand",
+    success: "text-success",
+    warning: "text-warning",
+    danger: "text-danger",
+    info: "text-info",
+    lilac: "text-subject-lilac",
+    mint: "text-subject-mint",
   };
 
   return (
     <div
       className={cn(
-        "rounded-2xl p-6",
+        "rounded-card p-5 sm:p-6",
         variants[variant],
-        hover && variant !== "glass" && "card-3d",
         className,
       )}
     >
-      {icon && (
-        <div
-          className={cn(
-            "inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4",
-            iconColors[iconColor],
-          )}
-        >
-          {icon}
-        </div>
-      )}
-      {children}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">{children}</div>
+        {icon ? (
+          <span aria-hidden className={cn("shrink-0", iconColors[iconColor])}>
+            {icon}
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -228,45 +208,45 @@ export function StatCard({
   hint?: string;
 }) {
   const iconColors = {
-    brand: "bg-brand-tint text-brand",
-    success: "bg-success-soft text-success",
-    warning: "bg-warning-soft text-warning",
-    danger: "bg-danger-soft text-danger",
-    info: "bg-info-soft text-info",
-    lilac: "bg-subject-lilac-soft text-subject-lilac",
-    mint: "bg-subject-mint-soft text-subject-mint",
+    brand: "text-brand",
+    success: "text-success",
+    warning: "text-warning",
+    danger: "text-danger",
+    info: "text-info",
+    lilac: "text-subject-lilac",
+    mint: "text-subject-mint",
   };
 
   return (
-    <EducationalCard className={cn("h-full", className)} variant="glass">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-caption font-semibold uppercase tracking-[0.08em] text-ink-faint">
-            {label}
-          </p>
-          <p className="mt-2 font-display text-3xl tabular-nums text-ink">
+    <div className={cn("h-full", className)}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-label font-bold uppercase text-ink-faint">{label}</p>
+          {/* Tabular, tight, heavy — the figure is the point of the card. */}
+          <p className="mt-2 font-display text-metric font-extrabold tabular-nums text-ink">
             {value}
           </p>
-          {hint && <p className="mt-1 text-sm text-ink-muted">{hint}</p>}
+          {hint && <p className="mt-1.5 text-small text-ink-muted">{hint}</p>}
         </div>
-        {icon && (
-          <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", iconColors[iconColor])}>
+        {/* Rendered as-is: a progress ring shows through, a glyph stays a
+            glyph. No pastel container is drawn around it. */}
+        {icon ? (
+          <span aria-hidden className={cn("shrink-0", iconColors[iconColor])}>
             {icon}
-          </div>
-        )}
+          </span>
+        ) : null}
       </div>
       {trend && (
         <div
           className={cn(
-            "mt-4 flex items-center gap-1.5 text-sm",
+            "mt-4 flex items-center gap-1.5 text-small font-semibold",
             trendUp ? "text-success" : "text-danger",
           )}
         >
-          <span className="font-medium">{trend}</span>
-          <span className="text-ink-muted">vs last period</span>
+          <span>{trend}</span>
         </div>
       )}
-    </EducationalCard>
+    </div>
   );
 }
 
@@ -348,8 +328,10 @@ export function ProgressRingAnimated({
       <svg width={size} height={size} className="-rotate-90" aria-hidden>
         <defs>
           <linearGradient id={`grad-${color}`} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgba(47,107,79,0.15)" />
-            <stop offset="100%" stopColor="rgba(47,107,79,0.45)" />
+            {/* stop-color accepts custom properties, so the ring follows the
+                brand token instead of a hardcoded hex drifting from it. */}
+            <stop offset="0%" stopColor="var(--color-brand)" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="var(--color-brand)" stopOpacity="1" />
           </linearGradient>
         </defs>
         <circle

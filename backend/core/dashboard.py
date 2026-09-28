@@ -9,13 +9,14 @@ with a message, never a placeholder number.
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.db.models import Count, Q
 from django.utils import timezone
 
 from academics.models import Timetable, TimetableStatus, Weekday
+from academics.selectors import days_until_period, next_period
 from assessment import analytics
 from assessment.models import Paper, PaperStatus, PracticeAttempt
 from engagement import selectors as engagement_selectors
@@ -71,17 +72,9 @@ def build_dashboard(*, user, scope) -> dict:
             for entry in entries
             if entry.day_of_week == now.weekday()
         ]
-        upcoming = next(
-            (
-                entry
-                for entry in entries
-                if entry.day_of_week > now.weekday()
-                or (entry.day_of_week == now.weekday() and entry.end_time > now.time())
-            ),
-            None,
-        )
+        upcoming = next_period(entries, now)
         if upcoming is not None:
-            target_date = now.date() + timedelta(days=(upcoming.day_of_week - now.weekday()) % 7)
+            target_date = now.date() + timedelta(days=days_until_period(upcoming, now))
             next_class = {
                 **_class_payload(upcoming, now, Weekday.label_for(upcoming.day_of_week)),
                 "is_today": upcoming.day_of_week == now.weekday(),
@@ -234,9 +227,11 @@ def _class_payload(entry, now, day_label: str) -> dict:
 
 
 def _minutes_until(now, target_date, target_time) -> int:
-    from django.utils.datetime import combine
+    """Whole minutes from ``now`` until ``target_time`` on ``target_date``."""
 
-    target = combine(target_date, target_time, tzinfo=now.tzinfo)
+    target = datetime.combine(target_date, target_time)
+    if timezone.is_naive(target):
+        target = timezone.make_aware(target, now.tzinfo)
     return max(0, int((target - now).total_seconds() // 60))
 
 

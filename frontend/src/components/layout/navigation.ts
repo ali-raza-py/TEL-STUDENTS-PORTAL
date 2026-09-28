@@ -2,6 +2,7 @@
 
 import {
   BookOpen,
+  CalendarCheck,
   CalendarDays,
   ClipboardList,
   FileStack,
@@ -12,7 +13,9 @@ import {
   Megaphone,
   MessageSquarePlus,
   NotebookPen,
+  ScrollText,
   UserRound,
+  Users,
 } from "lucide-react";
 
 import type { Capability } from "@/lib/session-types";
@@ -28,6 +31,11 @@ export interface NavItem {
 export interface NavGroup {
   label: string;
   items: NavItem[];
+  /**
+   * Pinned groups render in the rail footer, below the flexible gap, so the
+   * navigation column ends with account/settings rather than more content.
+   */
+  pinned?: boolean;
 }
 
 /**
@@ -76,12 +84,47 @@ export const navigation: NavGroup[] = [
     ],
   },
   {
+    // Staff only. Every item is capability-gated, so a student sees none of this
+    // group and the whole block disappears — the group has no "hidden" state.
+    label: "Staff",
+    items: [
+      { href: "/staff/students", label: "Students", icon: Users, capability: "view_students" },
+      {
+        href: "/staff/timetable-reviews",
+        label: "Timetable reviews",
+        icon: CalendarCheck,
+        capability: "review_timetable_submissions",
+      },
+      {
+        href: "/staff/requests",
+        label: "Request queue",
+        icon: LifeBuoy,
+        capability: "review_requests",
+      },
+      {
+        href: "/staff/announcements",
+        label: "Announcements",
+        icon: Megaphone,
+        capability: "manage_announcements",
+      },
+      {
+        href: "/staff/events",
+        label: "Calendar events",
+        icon: CalendarDays,
+        capability: "manage_academic_events",
+      },
+      { href: "/staff/papers", label: "Paper register", icon: FileStack, capability: "manage_papers" },
+      { href: "/staff/results", label: "Result register", icon: GraduationCap, capability: "manage_results" },
+      { href: "/staff/audit", label: "Audit log", icon: ScrollText, capability: "view_audit_log" },
+    ],
+  },
+  {
     label: "Account",
+    pinned: true,
     items: [
       { href: "/profile", label: "Profile", icon: UserRound },
       { href: "/class-tools", label: "Class tools", icon: ClipboardList, capability: "submit_timetable" },
-    ],
-  },
+    ],  },
 ];
 
 /** Bottom navigation on small screens — the five things a student opens daily. */

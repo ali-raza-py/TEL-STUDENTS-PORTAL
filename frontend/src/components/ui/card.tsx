@@ -15,7 +15,10 @@ export function Card({
   tone?: "surface" | "mint" | "muted" | "outline" | "sunken";
 }) {
   const tones = {
-    surface: "bg-surface border border-line shadow-soft",
+    /* Default is flat: a hairline, not a shadow. Elevation is reserved for
+       genuinely raised content so a page of cards doesn't read as one
+       undifferentiated slab. */
+    surface: "bg-surface border border-line shadow-[var(--shadow-hairline)]",
     mint: "bg-surface-mint border border-brand-soft/70",
     muted: "bg-surface-muted border border-line-soft",
     outline: "bg-transparent border border-line",
@@ -41,7 +44,7 @@ export function CardTitle({
   as: Tag = "h3",
   ...props
 }: React.HTMLAttributes<HTMLHeadingElement> & { as?: "h2" | "h3" | "h4" }) {
-  return <Tag className={cn("text-h3", className)} {...props} />;
+  return <Tag className={cn("text-h3 font-semibold text-ink", className)} {...props} />;
 }
 
 export function CardDescription({
@@ -95,7 +98,7 @@ export function Stat({
   } as const;
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <span className="flex items-center gap-1.5 text-caption font-semibold uppercase tracking-[0.08em] text-ink-faint">
+      <span className="flex items-center gap-1.5 text-label font-bold uppercase text-ink-faint">
         {icon}
         {label}
       </span>

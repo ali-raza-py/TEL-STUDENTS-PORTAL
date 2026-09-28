@@ -22,7 +22,7 @@ export function DropdownContent({
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          "animate-scale-in z-50 min-w-[12rem] overflow-hidden rounded-card border border-line bg-surface p-1.5 shadow-overlay",
+          "animate-scale-in z-50 min-w-[12rem] overflow-hidden rounded-panel border border-line bg-surface p-1.5 shadow-[var(--shadow-overlay)]",
           className,
         )}
         {...props}
@@ -56,7 +56,7 @@ export function DropdownItem({
 export function DropdownLabel({ className, ...props }: React.ComponentPropsWithoutRef<typeof DropdownMenu.Label>) {
   return (
     <DropdownMenu.Label
-      className={cn("px-3 py-1.5 text-caption font-semibold uppercase tracking-[0.08em] text-ink-faint", className)}
+      className={cn("px-3 py-1.5 text-label font-bold uppercase text-ink-faint", className)}
       {...props}
     />
   );

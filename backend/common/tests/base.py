@@ -20,6 +20,7 @@ from core.middleware import limiter
 
 NO_THROTTLE_LIMITS = {
     "api": "100000/min",
+    "session": "100000/min",
     "auth": "100000/min",
     "write": "100000/min",
     "upload": "100000/min",

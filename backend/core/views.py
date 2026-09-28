@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from django.db.models import Q
 from django.http import FileResponse, Http404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -9,6 +10,7 @@ from rest_framework.views import APIView
 from accounts.models import Role
 from academics.models import ClassRoom
 from common.exceptions import TelAPIException, Forbidden
+from common.pagination import TelPagination
 from core.audit import log_event
 from core.models import AuditLog, Notification, NotificationState, UploadRecord
 from core.serializers import AuditLogSerializer, MarkReadSerializer, NotificationSerializer
@@ -139,22 +141,26 @@ class AuditLogListView(APIView):
         if request.user.role not in {Role.ADMIN, Role.TEACHER} and not request.user.is_superuser:
             raise Forbidden("You do not have permission to view the audit log.")
         qs = AuditLog.objects.select_related("actor")
-        action = request.query_params.get("action")
+        params = request.query_params
+        action = params.get("action")
         if action:
             qs = qs.filter(action__startswith=action)
-        entity_type = request.query_params.get("entity_type")
+        entity_type = params.get("entity_type")
         if entity_type:
             qs = qs.filter(entity_type=entity_type)
-        try:
-            limit = min(int(request.query_params.get("limit", 50)), 200)
-        except (TypeError, ValueError):
-            limit = 50
-        return Response(
-            {
-                "count": qs.count(),
-                "results": AuditLogSerializer(qs[:limit], many=True).data,
-            }
-        )
+        role = params.get("role")
+        if role:
+            qs = qs.filter(actor_role=role)
+        search = (params.get("search") or "").strip()
+        if search:
+            qs = qs.filter(
+                Q(action__icontains=search)
+                | Q(summary__icontains=search)
+                | Q(actor__full_name__icontains=search)
+            )
+        paginator = TelPagination()
+        page = paginator.paginate_queryset(qs.order_by("-created_at"), request, view=self)
+        return paginator.get_paginated_response(AuditLogSerializer(page, many=True).data)
 
 
 class LookupDataView(APIView):

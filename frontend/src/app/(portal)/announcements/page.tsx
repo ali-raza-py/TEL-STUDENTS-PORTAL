@@ -15,6 +15,7 @@ import { formatDate, formatRelative, cn } from "@/lib/utils";
 import { useResource, useDebounced } from "@/lib/hooks/use-resource";
 import { endpoints } from "@/lib/endpoints";
 import type { AnnouncementRow } from "@/lib/types";
+import { FloatingOrbs, PageTransitionWrapper } from "@/components/education/education-components";
 
 export default function AnnouncementsPage() {
   const [search, setSearch] = useState("");
@@ -36,8 +37,11 @@ export default function AnnouncementsPage() {
   const others = announcements.filter((a) => !a.is_pinned);
 
   return (
-    <PageStack>
-      <PageHeader title="Announcements" description="Important updates from your school." />
+    <div className="relative min-h-[calc(100dvh-4rem)]">
+      <FloatingOrbs opacity={0.04} color="brand" count={4} />
+      <PageTransitionWrapper>
+        <PageStack>
+          <PageHeader title="Announcements" description="Important updates from your school." />
 
       <SearchInput
         value={search}
@@ -83,6 +87,8 @@ export default function AnnouncementsPage() {
         />
       )}
     </PageStack>
+    </PageTransitionWrapper>
+    </div>
   );
 }
 

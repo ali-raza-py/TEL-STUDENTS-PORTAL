@@ -39,7 +39,7 @@ export function TH({
     <th
       scope={scope}
       className={cn(
-        "whitespace-nowrap px-4 py-3 text-caption font-semibold uppercase tracking-[0.07em] text-ink-faint",
+        "whitespace-nowrap px-4 py-3 text-label font-bold uppercase text-ink-faint",
         className,
       )}
       {...props}

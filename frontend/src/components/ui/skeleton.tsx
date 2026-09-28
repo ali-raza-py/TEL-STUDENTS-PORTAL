@@ -42,7 +42,7 @@ export function SkeletonCard({ className }: { className?: string }) {
   return (
     <div
       aria-hidden
-      className={cn("rounded-card border border-line bg-surface p-5 shadow-soft", className)}
+      className={cn("rounded-card border border-line bg-surface p-5 shadow-[var(--shadow-hairline)]", className)}
     >
       {bar("h-3 w-24")}
       <div className="mt-4 space-y-2">
@@ -57,7 +57,7 @@ export function SkeletonStats({ count = 3 }: { count?: number }) {
   return (
     <div className="grid gap-3 sm:grid-cols-3" aria-hidden>
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className="rounded-card border border-line bg-surface p-5 shadow-soft">
+        <div key={index} className="rounded-card border border-line bg-surface p-5 shadow-[var(--shadow-hairline)]">
           {bar("h-3 w-20")}
           {bar("mt-4 h-7 w-24")}
           {bar("mt-3 h-3 w-16")}

@@ -295,9 +295,12 @@ class Command(BaseCommand):
                 email=email,
                 defaults={"full_name": name, "role": Role.TEACHER, "is_staff": True},
             )
-            if created:
+            if email == "teacher@tel.edu.pk":
                 user.set_password(DEMO_PASSWORD)
-                user.save()
+                user.full_name = name
+                user.role = Role.TEACHER
+                user.is_staff = True
+                user.save(update_fields=["password", "full_name", "role", "is_staff"])
             TeacherProfile.objects.get_or_create(
                 user=user, defaults={"employee_code": code, "designation": designation}
             )
@@ -329,6 +332,12 @@ class Command(BaseCommand):
     def _students(self, per_section: int, classes, sections, year) -> list[StudentProfile]:
         profiles: list[StudentProfile] = []
         counter = 1
+        # Keep the first two accounts stable so the documented demo
+        # credentials work after every fresh seed.
+        demo_accounts = {
+            1: ("student01@tel.edu.pk", "Student One"),
+            2: ("student02@tel.edu.pk", "Student Two"),
+        }
         for class_room in classes:
             section = sections[class_room.code][0]
             for index in range(per_section):
@@ -338,33 +347,46 @@ class Command(BaseCommand):
                 full_name = f"{first} {last}"
                 slug = f"{first}.{last}{index}".lower().replace("'", "")
                 email = f"{slug}.{class_room.code.lower()[:2]}@student.tel.edu.pk"
-                code = f"TEL-{class_room.program.code}-{counter:04d}"
+                if counter in demo_accounts:
+                    email, full_name = demo_accounts[counter]
+                student_number = counter
+                code = f"TEL-{class_room.program.code}-{student_number:04d}"
                 counter += 1
 
-                user, created = User.objects.get_or_create(
-                    email=email,
-                    defaults={"full_name": full_name, "role": Role.STUDENT},
-                )
-                if created:
+                # Reuse existing profiles on a non-destructive re-seed. This
+                # also upgrades older generated datasets to the documented
+                # student01/student02 account names without losing their work.
+                profile = StudentProfile.objects.select_related("user").filter(student_code=code).first()
+                if profile is None:
+                    user, created = User.objects.get_or_create(
+                        email=email,
+                        defaults={"full_name": full_name, "role": Role.STUDENT},
+                    )
+                    if created or student_number in demo_accounts:
+                        user.set_password(DEMO_PASSWORD)
+                        user.save(update_fields=["password"])
+                    profile = StudentProfile.objects.create(
+                        student_code=code,
+                        user=user,
+                        roll_number=str(index + 1),
+                        campus=class_room.campus,
+                        program=class_room.program,
+                        class_room=class_room,
+                        section=section,
+                        academic_year=year,
+                        admission_date=date(year.start_date.year, 8, 15),
+                        guardian_name=f"{random.choice(LAST_NAMES)} family",
+                        guardian_relation=random.choice(["Father", "Mother", "Guardian"]),
+                        guardian_phone=f"+92 3{random.randint(10, 49)} {random.randint(1000000, 9999999)}",
+                        blood_group=random.choice(["A+", "B+", "O+", "AB+", "O-"]),
+                    )
+                elif student_number in demo_accounts:
+                    user = profile.user
+                    user.email = email
+                    user.full_name = full_name
+                    user.role = Role.STUDENT
                     user.set_password(DEMO_PASSWORD)
-                    user.save()
-                profile, _ = StudentProfile.objects.get_or_create(
-                    student_code=code,
-                    defaults={
-                        "user": user,
-                        "roll_number": str(index + 1),
-                        "campus": class_room.campus,
-                        "program": class_room.program,
-                        "class_room": class_room,
-                        "section": section,
-                        "academic_year": year,
-                        "admission_date": date(year.start_date.year, 8, 15),
-                        "guardian_name": f"{random.choice(LAST_NAMES)} family",
-                        "guardian_relation": random.choice(["Father", "Mother", "Guardian"]),
-                        "guardian_phone": f"+92 3{random.randint(10, 49)} {random.randint(1000000, 9999999)}",
-                        "blood_group": random.choice(["A+", "B+", "O+", "AB+", "O-"]),
-                    },
-                )
+                    user.save(update_fields=["email", "full_name", "role", "password"])
                 profiles.append(profile)
         return profiles
 
@@ -376,9 +398,12 @@ class Command(BaseCommand):
             user, created = User.objects.get_or_create(
                 email=email, defaults={"full_name": name, "role": role, "is_staff": staff}
             )
-            if created:
+            if email == "admin@tel.edu.pk":
                 user.set_password(DEMO_PASSWORD)
-                user.save()
+                user.full_name = name
+                user.role = role
+                user.is_staff = staff
+                user.save(update_fields=["password", "full_name", "role", "is_staff"])
 
     # ------------------------------------------------------------------
     # Timetable
@@ -426,13 +451,29 @@ class Command(BaseCommand):
 
         class_room = classes[0]
         section = sections[class_room.code][0]
-        rep = next(
-            (p for p in students if p.class_room_id == class_room.pk and p.section_id == section.pk),
-            None,
-        )
-        if rep is None or TimetableSubmission.objects.filter(
-            class_room=class_room, section=section
-        ).exists():
+        class_students = [
+            profile
+            for profile in students
+            if profile.class_room_id == class_room.pk and profile.section_id == section.pk
+        ]
+        # student02@tel.edu.pk is the documented class representative.
+        rep = class_students[1] if len(class_students) > 1 else None
+        if rep is None:
+            return
+        active_rep = ClassRepresentative.objects.filter(
+            class_room=class_room, section=section, is_active=True
+        ).first()
+        if active_rep is not None:
+            if active_rep.user_id != rep.user_id:
+                former_rep = active_rep.user
+                former_rep.role = Role.STUDENT
+                former_rep.save(update_fields=["role"])
+                active_rep.user = rep.user
+                active_rep.save(update_fields=["user"])
+            rep.user.role = Role.CLASS_REPRESENTATIVE
+            rep.user.save(update_fields=["role"])
+            return
+        if TimetableSubmission.objects.filter(class_room=class_room, section=section).exists():
             return
         rep.user.role = Role.CLASS_REPRESENTATIVE
         rep.user.save(update_fields=["role"])

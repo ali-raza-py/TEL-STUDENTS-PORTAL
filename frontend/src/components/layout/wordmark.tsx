@@ -48,7 +48,7 @@ export function TelWordmark({
           TEL Education Link
         </span>
         {showSubtitle ? (
-          <span className={`${subtitle} text-caption uppercase tracking-[0.12em] text-ink-faint`}>
+          <span className={`${subtitle} text-label font-semibold uppercase text-ink-faint`}>
             Student Portal
           </span>
         ) : null}

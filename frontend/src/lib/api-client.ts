@@ -142,13 +142,15 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   if (!response.ok) {
     const body = payload as ApiErrorBody | null;
     const error = body?.error;
-    const isProxyOrGatewayFailure =
-      !error && (response.status === 502 || response.status === 503 || response.status === 504);
+    // Next.js returns an unstructured 500 response when its `/api` rewrite
+    // cannot reach Django. Keep a genuine API error intact, but make a proxy
+    // outage actionable instead of showing the generic application error.
+    const isServiceUnavailable = !error && response.status >= 500;
     throw new ApiError(
       response.status,
-      error?.code ?? (isProxyOrGatewayFailure ? "service_unavailable" : "server_error"),
+      error?.code ?? (isServiceUnavailable ? "service_unavailable" : "server_error"),
       error?.message ??
-        (isProxyOrGatewayFailure
+        (isServiceUnavailable
           ? "The TEL portal service is unavailable. Please try again in a moment."
           : "Something went wrong. Please try again."),
       error?.details ?? {},

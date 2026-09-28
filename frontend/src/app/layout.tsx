@@ -1,25 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Manrope, Space_Grotesk } from "next/font/google";
+import { Manrope } from "next/font/google";
 
 import { ToastProvider } from "@/components/ui/toast";
 import { AuthProvider } from "@/components/providers/auth-provider";
 
 import "./globals.css";
 
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  variable: "--font-dm-sans",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-  weight: ["500", "600", "700"],
-});
-
+/**
+ * One family for the entire product.
+ *
+ * Manrope covers display, UI, body and numerals: 800 gives confident page
+ * headings, 600–700 carries navigation and section titles, and its tabular
+ * figures keep metrics aligned in stat cards and tables. Loading a single
+ * family also removes two font requests from the critical path.
+ */
 const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-manrope",
@@ -43,12 +37,12 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#faf9f5",
+  themeColor: "#f4f7f9",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${spaceGrotesk.variable} ${manrope.variable}`}>
+    <html lang="en" className={manrope.variable}>
       <body className="min-h-dvh antialiased">
         <a
           href="#main"

@@ -15,6 +15,7 @@ export interface SessionUser {
 export type MeResponse_ = MeResponse;
 
 export type Capability =
+  /* Student surface */
   | "view_dashboard"
   | "view_timetable"
   | "view_subjects"
@@ -33,7 +34,25 @@ export type Capability =
   | "edit_profile_contact"
   | "change_password"
   | "submit_timetable"
-  | "report_timetable_change";
+  | "report_timetable_change"
+  /* Staff surface — issued to TEACHER and/or ADMIN, never to a student */
+  | "view_students"
+  | "review_timetable_submissions"
+  | "publish_timetable"
+  | "manage_papers"
+  | "publish_papers"
+  | "manage_results"
+  | "publish_results"
+  | "manage_attendance"
+  | "manage_assignments"
+  | "manage_resources"
+  | "manage_announcements"
+  | "manage_academic_events"
+  | "assign_class_representatives"
+  | "review_requests"
+  | "review_feedback"
+  | "manage_students"
+  | "view_audit_log";
 
 export type PortalProfile = Pick<
   StudentProfile,

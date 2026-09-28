@@ -4,7 +4,9 @@ import * as React from "react";
 import { cn, type Tone } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1.5 rounded-pill border px-2.5 py-1 text-caption font-semibold uppercase tracking-[0.06em]",
+  /* `text-label` carries the size + tracking for the uppercase treatment, so
+     the badge never has to re-declare letter-spacing per variant. */
+  "inline-flex items-center gap-1.5 rounded-pill border px-2.5 py-1 text-label font-bold uppercase",
   {
     variants: {
       tone: {
@@ -16,7 +18,7 @@ const badgeVariants = cva(
         neutral: "border-line bg-surface-muted text-ink-soft",
         solid: "border-transparent bg-brand text-white",
       },
-      size: { sm: "px-2 py-0.5 text-[0.625rem]", md: "" },
+      size: { sm: "px-2 py-0.5 text-[0.625rem] font-semibold", md: "" },
     },
     defaultVariants: { tone: "neutral", size: "md" },
   },

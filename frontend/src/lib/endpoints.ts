@@ -10,10 +10,12 @@ import { api } from "./api-client";
 import type {
   AcademicEventRow,
   AcademicYearBrief,
+  AdminDashboard,
   AnnouncementRow,
   AssignmentRow,
   AttendanceRecordRow,
   AttendanceSummary,
+  AuditPage,
   CalendarResponse,
   ClassToolkitAssignment,
   DashboardData,
@@ -31,8 +33,13 @@ import type {
   RequestRow,
   ResourceRow,
   ResultRow,
+  StaffResultRow,
+  StaffRequestQueue,
+  StaffRequestRowDetail,
+  StaffStudentRow,
   SubjectOffering,
   SubmissionStatus,
+  TeacherDashboard,
   TimetableResponse,
   TimetableSubmission,
   TimetableVersion,
@@ -60,8 +67,9 @@ export const endpoints = {
   },
 
   dashboard: {
-    get: (o?: Opt) =>
-      api.get<DashboardData | DashboardUnavailable>("/api/dashboard/", o),
+    /** Role shaped: students get `DashboardData`, staff get a `role` payload. */
+    get: <T = DashboardData | DashboardUnavailable | TeacherDashboard | AdminDashboard>(o?: Opt) =>
+      api.get<T>("/api/dashboard/", o),
   },
 
   academics: {
@@ -174,6 +182,56 @@ export const endpoints = {
     integrationStatus: (o?: Opt) => api.get<IntegrationStatus>("/api/integration/status/", o),
     health: (o?: Opt) =>
       api.get<{ status: string; database: string }>("/api/health/", o),
+  },
+
+  /**
+   * The staff surface. Every entry here is capability-gated in the navigation
+   * and authorised again on the server — hiding a link is a convenience, never
+   * the control.
+   */
+  staff: {
+    students: (query: RequestOptions["query"], o?: Opt) =>
+      api.get<{ count: number; results: StaffStudentRow[] }>("/api/manage/students/", { ...o, query }),
+
+    papers: (query: RequestOptions["query"], o?: Opt) =>
+      api.get<Paginated<PaperSummary>>("/api/manage/papers/", { ...o, query }),
+    transitionPaper: (id: number, body: { status: string; release_at?: string | null }, o?: Opt) =>
+      api.post<PaperDetail>(`/api/manage/papers/${id}/transition/`, body, o),
+
+    results: (query: RequestOptions["query"], o?: Opt) =>
+      api.get<{ count: number; results: StaffResultRow[] }>("/api/manage/results/", { ...o, query }),
+    transitionResult: (id: number, body: { status: string; note?: string }, o?: Opt) =>
+      api.post<StaffResultRow>(`/api/manage/results/${id}/transition/`, body, o),
+
+    timetableSubmissions: (query: RequestOptions["query"], o?: Opt) =>
+      api.get<{ count: number; results: TimetableSubmission[]; message?: string }>(
+        "/api/timetable/submissions/",
+        { ...o, query },
+      ),
+    reviewSubmission: (id: number, body: { decision: string; note?: string }) =>
+      api.post<TimetableSubmission>(`/api/timetable/submissions/${id}/review/`, body),
+    publishSubmission: (id: number, body: { effective_from?: string; change_note?: string }) =>
+      api.post<TimetableVersion>(`/api/timetable/submissions/${id}/publish/`, body),
+
+    requests: (query: RequestOptions["query"], o?: Opt) =>
+      api.get<StaffRequestQueue>("/api/student/requests/", { ...o, query }),
+    respondToRequest: (id: number, body: { status: string; response: string }) =>
+      api.post<StaffRequestRowDetail>(`/api/manage/requests/${id}/`, body),
+
+    announcements: (query: RequestOptions["query"], o?: Opt) =>
+      api.get<Paginated<AnnouncementRow>>("/api/student/announcements/", { ...o, query }),
+    publishAnnouncement: (form: FormData) =>
+      api.postForm<AnnouncementRow>("/api/manage/announcements/", form),
+
+    calendar: (query: RequestOptions["query"], o?: Opt) =>
+      api.get<CalendarResponse>("/api/student/calendar/", { ...o, query }),
+    createEvent: (form: FormData) => api.postForm<AcademicEventRow>("/api/manage/events/", form),
+
+    examTypes: (o?: Opt) => api.get<{ value: string; label: string }[]>("/api/exam-types/", o),
+    resultStatuses: (o?: Opt) =>
+      api.get<{ value: string; label: string }[]>("/api/result-statuses/", o),
+    auditLog: (query: RequestOptions["query"], o?: Opt) =>
+      api.get<AuditPage>("/api/audit-log/", { ...o, query }),
   },
 };
 

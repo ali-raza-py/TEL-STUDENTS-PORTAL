@@ -4,22 +4,34 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.models import Role
 from academics.selectors import resolve_student_scope
 from core.dashboard import build_dashboard
+from core.staff_dashboard import build_admin_dashboard, build_teacher_dashboard
 
 
 class DashboardView(APIView):
     """
     The single endpoint behind the dashboard.
 
-    Every value is computed from TEL data. Missing data is reported as an
-    explicit empty state rather than filled in with a plausible number.
+    The payload is role shaped. Students and class representatives get their own
+    academic overview; teachers get their teaching load and review queues;
+    administrators get the institution wide picture. Every value is computed
+    from TEL data, and missing data is reported as an explicit empty state
+    rather than filled in with a plausible number.
     """
 
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        scope = resolve_student_scope(request.user, required=False)
+        user = request.user
+
+        if user.is_superuser or user.role == Role.ADMIN:
+            return Response(build_admin_dashboard(user=user))
+        if user.role == Role.TEACHER:
+            return Response(build_teacher_dashboard(user=user))
+
+        scope = resolve_student_scope(user, required=False)
         if scope is None:
             return Response(
                 {
@@ -41,4 +53,4 @@ class DashboardView(APIView):
                     ),
                 }
             )
-        return Response(build_dashboard(user=request.user, scope=scope))
+        return Response(build_dashboard(user=user, scope=scope))

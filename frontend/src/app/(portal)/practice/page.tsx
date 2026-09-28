@@ -16,6 +16,7 @@ import { subjectToken, formatPercent, formatDate, statusTone } from "@/lib/utils
 import { useResource, useDebounced } from "@/lib/hooks/use-resource";
 import { endpoints } from "@/lib/endpoints";
 import type { PaperSummary, PracticeHistoryRow, Paginated } from "@/lib/types";
+import { PageTransitionWrapper } from "@/components/education/education-components";
 
 export default function PracticePage() {
   const [activeTab, setActiveTab] = useState("papers");
@@ -46,11 +47,13 @@ export default function PracticePage() {
   }
 
   return (
-    <PageStack>
-      <PageHeader
-        title="Practice"
-        description="Practice with past papers and review your attempts."
-      />
+    <div className="relative min-h-[calc(100dvh-4rem)]">
+      <PageTransitionWrapper>
+        <PageStack>
+          <PageHeader
+            title="Practice"
+            description="Practice with past papers and review your attempts."
+          />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
@@ -185,5 +188,7 @@ export default function PracticePage() {
         </TabsContent>
       </Tabs>
     </PageStack>
+    </PageTransitionWrapper>
+  </div>
   );
 }

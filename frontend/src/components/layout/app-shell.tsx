@@ -107,17 +107,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         Skip to main content
       </a>
 
-      {/* Desktop rail */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[16.5rem] border-r border-line lg:block">
+      {/* Desktop rail. `rail-shape` keeps the left edge clean and vertical while
+          rounding the right corners, so the rail reads as a panel inset into the
+          shell rather than a strip of browser chrome welded to the window.
+          `overflow-hidden` is required or the frosted child would square the
+          rounded corners off. */}
+      <aside className="rail-shape fixed inset-y-0 left-0 z-30 hidden w-[var(--rail-width)] overflow-hidden border-r border-line shadow-[var(--shadow-soft)] lg:block">
         <Sidebar />
       </aside>
 
       {/* Tablet / mobile drawer */}
       <SidebarDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
-      <div className="lg:pl-[16.5rem]">
-        <header className="sticky top-0 z-20 border-b border-line bg-canvas/85 backdrop-blur-md">
-          <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-9">
+      <div className="lg:pl-[var(--rail-width)]">
+        {/* Frosted topbar: the blur is a local accent, not a global effect. */}
+        <header className="sticky top-0 z-20 border-b border-line bg-[var(--frost-topbar)] backdrop-blur-[var(--blur-menu)]">
+          <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
             <MobileNavButton onClick={() => setDrawerOpen(true)} />
             <div className="lg:hidden">
               <TelWordmark size="sm" showSubtitle={false} />
@@ -136,10 +141,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           id="main"
           tabIndex={-1}
           className={cn(
-            "mx-auto w-full max-w-[92rem] px-4 pb-28 pt-6 outline-none sm:px-6 lg:px-9 lg:pb-14 lg:pt-8",
+            "mx-auto w-full max-w-[92rem] px-4 pb-28 pt-6 outline-none sm:px-6 lg:px-8 lg:pb-14 lg:pt-8",
           )}
         >
-          {children}
+          <div className="min-h-[calc(100dvh-4rem)]">{children}</div>
         </main>
       </div>
 

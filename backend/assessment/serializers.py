@@ -50,6 +50,11 @@ class PaperListSerializer(serializers.ModelSerializer):
     attempts_remaining = serializers.SerializerMethodField()
     can_practice = serializers.SerializerMethodField()
     has_paper_file = serializers.SerializerMethodField()
+    visibility_scope = serializers.CharField(read_only=True)
+    visibility_scope_label = serializers.CharField(
+        source="get_visibility_scope_display", read_only=True
+    )
+    shared_campuses = serializers.SerializerMethodField()
 
     class Meta:
         model = Paper
@@ -89,6 +94,17 @@ class PaperListSerializer(serializers.ModelSerializer):
             "has_paper_file",
             "allow_retake",
             "attempt_limit",
+            "visibility_scope",
+            "visibility_scope_label",
+            "shared_campuses",
+        ]
+
+    def get_shared_campuses(self, obj: Paper):
+        if obj.visibility_scope != "SELECTED_CAMPUSES":
+            return []
+        return [
+            {"id": c.campus_id, "name": c.campus.name}
+            for c in obj.shared_campuses.select_related("campus").all()
         ]
 
     def _attempts(self, obj: Paper):
@@ -306,6 +322,16 @@ class ResultSerializer(serializers.ModelSerializer):
     percentage = serializers.FloatField(read_only=True)
     status_label = serializers.CharField(source="get_status_display", read_only=True)
     paper_title = serializers.CharField(source="paper.title", read_only=True, default="")
+    # Who the result belongs to. The staff register is unusable without this —
+    # a result row that cannot be attributed to a student is not a record.
+    student_name = serializers.CharField(
+        source="student.user.full_name", read_only=True, default=""
+    )
+    student_code = serializers.CharField(source="student.student_code", read_only=True, default="")
+    class_name = serializers.CharField(
+        source="student.class_room.display_name", read_only=True, default=""
+    )
+    section_name = serializers.CharField(source="student.section.name", read_only=True, default="")
     items = ResultItemSerializer(many=True, read_only=True)
     has_topic_breakdown = serializers.SerializerMethodField()
 
@@ -313,6 +339,11 @@ class ResultSerializer(serializers.ModelSerializer):
         model = Result
         fields = [
             "id",
+            "student",
+            "student_name",
+            "student_code",
+            "class_name",
+            "section_name",
             "assessment_name",
             "assessment_type",
             "assessment_type_label",

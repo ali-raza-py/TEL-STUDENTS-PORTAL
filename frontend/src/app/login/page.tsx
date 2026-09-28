@@ -11,7 +11,7 @@ import { ErrorState } from "@/components/ui/states";
 import { TelWordmark } from "@/components/layout/wordmark";
 import { useAuth } from "@/components/providers/auth-provider";
 import { ApiError } from "@/lib/api-client";
-import { FloatingOrbs, PageTransitionWrapper } from "@/components/education/education-components";
+import { PageTransitionWrapper } from "@/components/education/education-components";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -43,27 +43,26 @@ export default function LoginPage() {
 
   return (
     <main id="main" className="relative min-h-dvh lg:grid lg:grid-cols-[minmax(22rem,0.85fr)_minmax(30rem,1.15fr)] bg-hero-gradient overflow-hidden">
-      <FloatingOrbs opacity={0.06} color="brand" count={6} />
 
-      <section className="relative hidden overflow-hidden bg-[#102a43] px-12 py-12 text-white lg:flex lg:flex-col lg:justify-between xl:px-20">
-        <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full border-[3rem] border-[#1e5268] opacity-60" />
-        <div className="absolute -bottom-28 -left-24 h-96 w-96 rounded-full border-[4rem] border-[#0b3d58] opacity-80" />
+      <section className="relative hidden overflow-hidden bg-[var(--color-on-dark)] px-12 py-12 text-white lg:flex lg:flex-col lg:justify-between xl:px-20">
+        <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full border-[3rem] border-[var(--color-on-dark-raise)] opacity-60" />
+        <div className="absolute -bottom-28 -left-24 h-96 w-96 rounded-full border-[4rem] border-brand-deep opacity-70" />
         <div className="relative">
           <PageTransitionWrapper delay={0.3}>
             <TelWordmark size="md" showSubtitle={false} className="[&_span]:text-white [&>span:first-child]:bg-brand" />
             <div className="mt-24 max-w-md">
-              <p className="text-caption font-semibold uppercase tracking-[0.16em] text-[#8bd5d7]">Student access</p>
-              <h1 className="mt-5 font-display text-[clamp(2.5rem,4vw,4.4rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-white">
+              <p className="text-label font-bold uppercase text-[var(--color-on-dark-accent)]">Student access</p>
+              <h1 className="mt-5 font-display text-[clamp(2.5rem,4vw,4.4rem)] font-extrabold leading-[1.02] tracking-[-0.035em] text-white">
                 Your learning, in one clear view.
               </h1>
-              <p className="mt-7 max-w-sm text-body-lg leading-relaxed text-[#c5d8e1]">
+              <p className="mt-7 max-w-sm text-body-lg leading-relaxed text-[var(--color-on-dark-text)]">
                 A focused home for your timetable, attendance, assessments, and academic progress.
               </p>
             </div>
           </PageTransitionWrapper>
         </div>
-        <div className="relative flex items-center gap-3 text-small text-[#c5d8e1]">
-          <ShieldCheck className="h-5 w-5 text-[#8bd5d7]" aria-hidden />
+        <div className="relative flex items-center gap-3 text-small text-[var(--color-on-dark-text)]">
+          <ShieldCheck className="h-5 w-5 text-[var(--color-on-dark-accent)]" aria-hidden />
           Secure access for the TEL Education Link community
         </div>
       </section>
@@ -75,7 +74,7 @@ export default function LoginPage() {
           </div>
 
           <PageTransitionWrapper>
-            <p className="text-caption font-semibold uppercase tracking-[0.16em] text-brand">Student portal</p>
+            <p className="text-label font-bold uppercase text-brand">Student portal</p>
             <h2 className="mt-3 font-display text-display text-ink">Welcome back</h2>
             <p className="mt-3 max-w-md text-body text-ink-muted">
               Sign in with your institutional account to continue to your dashboard.

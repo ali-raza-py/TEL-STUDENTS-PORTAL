@@ -16,6 +16,7 @@ import { subjectToken, formatFileSize } from "@/lib/utils";
 import { useResource, useDebounced } from "@/lib/hooks/use-resource";
 import { endpoints } from "@/lib/endpoints";
 import type { ResourceRow, Paginated } from "@/lib/types";
+import { FloatingOrbs, PageTransitionWrapper } from "@/components/education/education-components";
 
 export default function ResourcesPage() {
   const [search, setSearch] = useState("");
@@ -41,8 +42,11 @@ export default function ResourcesPage() {
   const activeFilters = (debouncedSearch ? 1 : 0) + (subjectFilter ? 1 : 0) + (categoryFilter ? 1 : 0);
 
   return (
-    <PageStack>
-      <PageHeader title="Resources" description="Study materials and downloads for your subjects." />
+    <div className="relative min-h-[calc(100dvh-4rem)]">
+      <FloatingOrbs opacity={0.04} color="lilac" count={4} />
+      <PageTransitionWrapper>
+        <PageStack>
+          <PageHeader title="Resources" description="Study materials and downloads for your subjects." />
 
       <FilterBar
         onReset={() => { setSearch(""); setSubjectFilter(""); setCategoryFilter(""); setPage(1); }}
@@ -92,6 +96,8 @@ export default function ResourcesPage() {
         </>
       )}
     </PageStack>
+    </PageTransitionWrapper>
+    </div>
   );
 }
 

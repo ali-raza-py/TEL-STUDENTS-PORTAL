@@ -11,10 +11,7 @@ import {
 
 import { TelWordmark } from "@/components/layout/wordmark";
 import { Button } from "@/components/ui/button";
-import {
-  FloatingEducationBackground,
-  PageTransitionWrapper,
-} from "@/components/education/education-components";
+import { PageTransitionWrapper } from "@/components/education/education-components";
 
 const features = [
   {
@@ -58,8 +55,6 @@ const features = [
 export default function HomePage() {
   return (
     <>
-      <FloatingEducationBackground opacity={0.03} />
-
       <div className="relative z-10 mx-auto min-h-dvh">
         {/* Hero */}
         <header className="flex flex-col items-center pt-12 pb-8 sm:pt-16 sm:pb-12">
@@ -158,7 +153,7 @@ function FeatureCard({
 }) {
   return (
     <div
-      className="card-3d rounded-card bg-surface p-6 shadow-soft animate-fade-in-up"
+      className="rounded-card border border-line bg-surface p-6 shadow-hairline"
       style={{ animationDelay: `${delay * 0.08}s` }}
     >
       <div

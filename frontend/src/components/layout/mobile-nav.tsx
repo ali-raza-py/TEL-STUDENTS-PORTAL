@@ -38,8 +38,8 @@ export function MobileBottomNav() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1 px-1 py-2.5 text-[0.625rem] font-medium transition-colors duration-200",
-                  active ? "text-brand" : "text-ink-faint",
+                  "flex flex-col items-center gap-1 px-1 py-2.5 text-[0.625rem] transition-colors duration-200",
+                  active ? "font-semibold text-brand" : "font-medium text-ink-faint",
                 )}
               >
                 <span
@@ -48,7 +48,7 @@ export function MobileBottomNav() {
                     active && "bg-brand-tint",
                   )}
                 >
-                  <Icon className="h-[1.15rem] w-[1.15rem]" aria-hidden />
+                  <Icon className="size-[1.125rem]" aria-hidden />
                 </span>
                 {item.label}
               </a>

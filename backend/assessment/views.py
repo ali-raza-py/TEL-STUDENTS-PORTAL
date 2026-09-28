@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from django.db.models import Count, Q
+from django.db.models import Avg, Count, Q
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.exceptions import NotFound
@@ -21,8 +21,10 @@ from assessment.models import (
     PaperQuestion,
     PaperStatus,
     PracticeAttempt,
+    PracticePaperCampus,
     Result,
     ResultStatus,
+    VisibilityScope,
 )
 from assessment.serializers import (
     PaperDetailSerializer,
@@ -57,6 +59,60 @@ def _attempt_map(papers, student):
     return grouped
 
 
+def _paper_access_q(scope):
+    """Build a Q object for papers the student can access based on visibility_scope.
+
+    A student can access a paper when:
+    - The paper belongs to their own class (PRIVATE), OR
+    - The paper's visibility_scope is CAMPUS_ONLY and the paper's campus matches, OR
+    - The paper's visibility_scope is ALL_TEL, OR
+    - The paper's visibility_scope is SELECTED_CAMPUSES and the student's campus
+      is in the paper's shared_campuses.
+
+    Critically, this NEVER grants access to another campus's academic records
+    (attendance, results, progress, student lists). It only controls practice
+    paper visibility.
+    """
+    from django.db.models import Exists, OuterRef
+
+    # Owner class papers are always accessible to that class
+    owner_q = Q(class_room_id=scope.class_id)
+
+    # CAMPUS_ONLY: any paper from the student's own campus
+    campus_q = Q(visibility_scope=VisibilityScope.CAMPUS_ONLY, campus_id=scope.campus_id)
+
+    # ALL_TEL: any paper marked for all campuses
+    all_tel_q = Q(visibility_scope=VisibilityScope.ALL_TEL)
+
+    # SELECTED_CAMPUSES: owner campus is always included, plus explicit grants
+    selected_q = Q(visibility_scope=VisibilityScope.SELECTED_CAMPUSES) & (
+        Q(campus_id=scope.campus_id)
+        | Exists(
+            PracticePaperCampus.objects.filter(
+                paper_id=OuterRef("pk"),
+                campus_id=scope.campus_id,
+            ).values("pk")
+        )
+    )
+
+    return owner_q | campus_q | all_tel_q | selected_q
+
+
+def _subject_filter(raw: str) -> Q:
+    """
+    Match a subject by primary key *or* by code.
+
+    The value is user supplied, so it may be either. Comparing a non-numeric
+    string against ``subject_id`` raises rather than returning no rows, so the
+    id branch is only built when the value really is an integer.
+    """
+
+    try:
+        return Q(subject_id=int(raw))
+    except (TypeError, ValueError):
+        return Q(subject__code__iexact=raw)
+
+
 # ---------------------------------------------------------------------------
 # Papers / practice archive
 # ---------------------------------------------------------------------------
@@ -83,7 +139,7 @@ class PaperListView(APIView):
         if params.get("status"):
             qs = qs.filter(status__in=params["status"].split(","))
         if params.get("subject"):
-            qs = qs.filter(Q(subject_id=params["subject"]) | Q(subject__code__iexact=params["subject"]))
+            qs = qs.filter(_subject_filter(params["subject"]))
         if params.get("type"):
             qs = qs.filter(exam_type__in=params["type"].split(","))
         if params.get("year"):
@@ -119,7 +175,12 @@ class PaperListView(APIView):
 
 
 class StudentPaperListView(APIView):
-    """Paper archive scoped to the signed-in student, with attempt context."""
+    """Paper archive scoped to the signed-in student, with attempt context.
+
+    Includes papers shared cross-campus via visibility_scope. The student only
+    ever sees papers they are authorized to access — never another campus's
+    private academic records.
+    """
 
     permission_classes = [IsAuthenticated]
 
@@ -130,13 +191,12 @@ class StudentPaperListView(APIView):
 
         qs = (
             Paper.objects.visible_to_students()
-            .filter(
-                class_room_id=scope.class_id,
-                academic_year_id=scope.academic_year_id,
-            )
+            .filter(_paper_access_q(scope))
+            .filter(academic_year_id=scope.academic_year_id)
             .select_related("subject", "class_room", "section", "campus", "academic_year", "teacher")
             .annotate(question_count=Count("questions", distinct=True))
         )
+        # Own-class papers must still match section scope
         qs = qs.filter(Q(section_id=scope.section_id) | Q(section__isnull=True))
 
         if params.get("subject"):
@@ -177,11 +237,15 @@ class PaperDetailView(APIView):
 
     def get(self, request, pk: int):
         scope = resolve_student_scope(request.user, required=False)
+        if not _is_staff(request.user) and scope is None:
+            raise NotFound("That paper could not be found.")
         paper = (
-            Paper.objects.select_related(
+            Paper.objects.visible_to_students()
+            .filter(pk=pk)
+            .filter(_paper_access_q(scope))
+            .select_related(
                 "subject", "class_room", "section", "campus", "academic_year", "teacher"
             )
-            .filter(pk=pk)
             .annotate(question_count=Count("questions", distinct=True))
             .first()
         )
@@ -189,10 +253,7 @@ class PaperDetailView(APIView):
             raise NotFound("That paper could not be found.")
 
         if not _is_staff(request.user):
-            if scope is None or not paper.is_visible_to_students:
-                raise NotFound("That paper could not be found.")
-            if paper.class_room_id != scope.class_id:
-                # Do not disclose the existence of another class's paper.
+            if not paper.is_visible_to_students:
                 raise NotFound("That paper could not be found.")
 
         attempts = _attempt_map([paper], scope.profile) if scope else {}
@@ -201,18 +262,27 @@ class PaperDetailView(APIView):
 
 
 class StartPracticeView(APIView):
-    """Starts or resumes an attempt and returns the runnable session."""
+    """Starts or resumes an attempt and returns the runnable session.
+
+    Cross-campus papers are accessible here based on visibility_scope,
+    but this only grants practice access — never access to another
+    campus's academic records.
+    """
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk: int):
         scope = resolve_student_scope(request.user)
-        paper = Paper.objects.filter(pk=pk).select_related(
-            "subject", "class_room", "section", "campus", "academic_year"
-        ).first()
+        paper = (
+            Paper.objects.visible_to_students()
+            .filter(pk=pk)
+            .filter(_paper_access_q(scope))
+            .select_related(
+                "subject", "class_room", "section", "campus", "academic_year"
+            )
+            .first()
+        )
         if paper is None or not paper.is_visible_to_students:
-            raise NotFound("That paper could not be found.")
-        if paper.class_room_id != scope.class_id:
             raise NotFound("That paper could not be found.")
 
         attempt, created = practice.start_attempt(paper=paper, student=scope.profile)
@@ -647,14 +717,27 @@ class ManageResultListCreateView(APIView):
     def get(self, request):
         if not _is_staff(request.user):
             raise Forbidden("Only TEL staff can browse the result register.")
-        qs = Result.objects.select_related("student", "subject", "paper")
+        qs = Result.objects.select_related(
+            "student", "student__user", "student__class_room", "student__section", "subject", "paper"
+        )
         params = request.query_params
         if params.get("status"):
             qs = qs.filter(status__in=params["status"].split(","))
         if params.get("class"):
             qs = qs.filter(student__class_room_id=params["class"])
+        if params.get("section"):
+            qs = qs.filter(student__section_id=params["section"])
+        if params.get("subject"):
+            qs = qs.filter(_subject_filter(params["subject"]))
         if params.get("student"):
             qs = qs.filter(student_id=params["student"])
+        search = (params.get("search") or "").strip()
+        if search:
+            qs = qs.filter(
+                Q(assessment_name__icontains=search)
+                | Q(student__user__full_name__icontains=search)
+                | Q(student__student_code__icontains=search)
+            )
         try:
             limit = min(int(params.get("limit", 50)), 200)
         except (TypeError, ValueError):

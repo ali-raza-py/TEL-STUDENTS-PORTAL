@@ -15,7 +15,6 @@ import { subjectToken, formatPercent, formatDate, statusTone } from "@/lib/utils
 import { useResource, useDebounced } from "@/lib/hooks/use-resource";
 import { endpoints } from "@/lib/endpoints";
 import type { PaperSummary, Paginated } from "@/lib/types";
-import { FloatingOrbs } from "@/components/education/education-components";
 
 export default function PapersPage() {
   const [search, setSearch] = useState("");
@@ -68,7 +67,6 @@ export default function PapersPage() {
 
   return (
     <div className="relative min-h-[calc(100dvh-4rem)]">
-      <FloatingOrbs count={3} color="info" opacity={0.03} />
       <PageStack className="relative z-10">
         <PageHeader
           title="Papers"

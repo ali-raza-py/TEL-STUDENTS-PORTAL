@@ -5,6 +5,15 @@ and a lightweight sliding-window rate limiter.
 The limiter is a per-process fixed-window counter keyed by authenticated user
 when available and by client IP otherwise. It is intentionally dependency free;
 a multi-process deployment should swap ``TEL_RATE_LIMIT_STORE`` for Redis.
+
+Two rules keep the strict limit useful instead of self-inflicted:
+
+* Only endpoints that actually verify a credential get the tight ``auth``
+  budget. The cheap session plumbing the SPA calls on every render
+  (``csrf/``, ``me/``, ``logout/``) uses the generous ``session`` budget, so
+  reloading a page can never lock a real user out of signing in.
+* Credential endpoints are throttled per path. Brute forcing ``login/`` must
+  not throttle the unrelated ``password/reset/`` flow, and vice versa.
 """
 
 from __future__ import annotations
@@ -82,16 +91,32 @@ class ApiRateLimitMiddleware:
 
     EXEMPT_PREFIXES = ("/api/health/",)
 
+    #: Endpoints that verify a credential. These — and only these — draw on the
+    #: tight ``auth`` budget, each on its own key.
+    CREDENTIAL_PATHS = frozenset(
+        {
+            "/api/auth/login/",
+            "/api/auth/password/change/",
+            "/api/auth/password/forgot/",
+            "/api/auth/password/reset/",
+        }
+    )
+
+    #: Cheap session plumbing the SPA hits on every page render. A user who
+    #: reloads the app a dozen times must still be able to sign in, so these use
+    #: the ``session`` budget instead of ``auth``.
+    SESSION_PREFIXES = ("/api/auth/csrf/", "/api/auth/me/", "/api/auth/logout/", "/api/auth/profile/")
+
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         if settings.RATE_LIMIT_ENABLED and request.path.startswith("/api/"):
             if not any(request.path.startswith(p) for p in self.EXEMPT_PREFIXES):
-                limit_name, rate = self._resolve(request)
+                limit_name, rate, scope = self._resolve(request)
                 if rate:
                     count, window = _parse_rate(rate)
-                    key = f"{limit_name}:{_bucket_for(request)}"
+                    key = f"{limit_name}:{scope}:{_bucket_for(request)}"
                     allowed, retry_after = limiter.hit(key, count, window)
                     if not allowed:
                         response = JsonResponse(
@@ -109,14 +134,22 @@ class ApiRateLimitMiddleware:
                         return response
         return self.get_response(request)
 
-    @staticmethod
-    def _resolve(request) -> tuple[str, str]:
+    @classmethod
+    def _resolve(cls, request) -> tuple[str, str, str]:
+        """Returns ``(bucket name, rate, scope)`` for the request.
+
+        ``scope`` keeps credential endpoints on independent keys and is empty
+        for every shared bucket.
+        """
+
         limits = settings.TEL_RATE_LIMITS
         path = request.path
-        if path.startswith("/api/auth/"):
-            return "auth", limits["auth"]
+        if path in cls.CREDENTIAL_PATHS:
+            return "auth", limits["auth"], path
+        if any(path.startswith(p) for p in cls.SESSION_PREFIXES):
+            return "session", limits.get("session", "600/min"), ""
         if request.method in {"POST", "PUT", "PATCH", "DELETE"} and "upload" in path:
-            return "upload", limits["upload"]
+            return "upload", limits["upload"], ""
         if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
-            return "write", limits["write"]
-        return "api", limits["api"]
+            return "write", limits["write"], ""
+        return "api", limits["api"], ""

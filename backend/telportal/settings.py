@@ -327,6 +327,7 @@ CSRF_COOKIE_NAME = CSRF_COOKIE_NAME
 
 TEL_RATE_LIMITS = {
     "api": env("RATE_LIMIT_API", "1200/min"),
+    "session": env("RATE_LIMIT_SESSION", "600/min"),
     "auth": env("RATE_LIMIT_AUTH", "30/min"),
     "write": env("RATE_LIMIT_WRITE", "240/min"),
     "upload": env("RATE_LIMIT_UPLOAD", "40/min"),

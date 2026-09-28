@@ -332,7 +332,333 @@ export interface DashboardUnavailable {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Timetable                                                                  */
+/* Staff dashboards                                                            */
+/* -------------------------------------------------------------------------- */
+
+export type StaffRole = "TEACHER" | "ADMIN";
+
+/** A timetable period as a member of staff sees it — with its class, not their own. */
+export interface StaffPeriod {
+  id: number;
+  subject: string;
+  subject_code: string;
+  subject_color: SubjectColor;
+  class_name: string;
+  section_name: string;
+  room: string;
+  campus: string;
+  day: number;
+  start: string;
+  end: string;
+  start_label: string;
+  end_label: string;
+  is_current: boolean;
+  is_past: boolean;
+  is_today?: boolean;
+  date?: string;
+  day_label?: string;
+}
+
+export interface StaffIdentity {
+  greeting: string;
+  first_name: string;
+  full_name: string;
+  email: string;
+  employee_code: string;
+  designation: string;
+  campus: string;
+}
+
+export interface TeacherDashboard {
+  role: "TEACHER";
+  generated_at: string;
+  identity: StaffIdentity;
+  stats: {
+    classes: number;
+    subjects: number;
+    students: number;
+    papers: number;
+    unreviewed_submissions: number;
+    timetable_queue: number;
+    open_requests: number;
+  };
+  today_classes: StaffPeriod[];
+  next_class: StaffPeriod | null;
+  teaching: {
+    class_id: number;
+    section_id: number | null;
+    class_name: string;
+    section_name: string;
+    campus: string;
+    subjects: { id: number; name: string; color: SubjectColor }[];
+    student_count: number;
+  }[];
+  queues: {
+    unreviewed_submissions: {
+      id: number;
+      student_name: string;
+      student_code: string;
+      assignment_title: string;
+      subject: string;
+      subject_color: SubjectColor;
+      status: string;
+      submitted_at: string | null;
+    }[];
+    timetable_submissions: {
+      id: number;
+      class_name: string;
+      section_name: string;
+      submitted_by: string;
+      summary: string;
+      status: string;
+      created_at: string | null;
+    }[];
+    open_requests: StaffRequestRow[];
+  };
+  at_risk_students: {
+    id: number;
+    name: string;
+    student_code: string;
+    class_name: string;
+    section_name: string;
+    percentage: number;
+    sessions: number;
+  }[];
+  unplaced_hint: string;
+  notifications: { unread: number };
+}
+
+export interface StaffRequestRow {
+  id: number;
+  ticket_id: string;
+  student_name: string;
+  class_name?: string;
+  request_type: string;
+  request_type_label: string;
+  subject_line: string;
+  status: string;
+  created_at: string | null;
+}
+
+export interface AdminDashboard {
+  role: "ADMIN";
+  generated_at: string;
+  identity: StaffIdentity;
+  academic_year: { id: number | null; label: string; is_current: boolean };
+  stats: {
+    students: number;
+    teachers: number;
+    classes: number;
+    programs: number;
+    unplaced_students: number;
+    papers_draft: number;
+    papers_unverified: number;
+    results_unpublished: number;
+    timetable_queue: number;
+    open_requests: number;
+    new_feedback: number;
+  };
+  enrolment: {
+    by_campus: { id: number; name: string; total: number }[];
+    by_program: { id: number; name: string; total: number }[];
+  };
+  queues: {
+    papers_awaiting_verification: {
+      id: number;
+      title: string;
+      subject: string;
+      subject_color: SubjectColor;
+      class_name: string;
+      teacher: string;
+      total_marks: number | null;
+      created_at: string | null;
+    }[];
+    results_awaiting_publication: {
+      id: number;
+      student_name: string;
+      assessment_name: string;
+      subject: string;
+      subject_color: SubjectColor;
+      percentage: number | null;
+      status: string;
+      assessment_date: string | null;
+    }[];
+    timetable_submissions: {
+      id: number;
+      class_name: string;
+      section_name: string;
+      submitted_by: string;
+      summary: string;
+      status: string;
+      created_at: string | null;
+    }[];
+    open_requests: StaffRequestRow[];
+    unplaced_students: { id: number; name: string; student_code: string; missing: string }[];
+  };
+  upcoming_events: {
+    id: number;
+    title: string;
+    event_type_label: string;
+    starts_at: string | null;
+    is_all_day: boolean;
+    subject_color: SubjectColor;
+  }[];
+  recent_activity: {
+    id: number;
+    action: string;
+    summary: string;
+    actor: string;
+    actor_role: string;
+    created_at: string | null;
+  }[];
+  notifications: { unread: number };
+}
+
+/** Narrowing guard — the staff payloads always carry a `role` discriminator. */
+export function isStaffDashboard(
+  data: DashboardData | TeacherDashboard | AdminDashboard | DashboardUnavailable,
+): data is TeacherDashboard | AdminDashboard {
+  return "role" in data;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Staff register resources                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** Paper lifecycle. The server decides which move is legal from the current state. */
+export type PaperStatus =
+  | "DRAFT"
+  | "COMPLETED"
+  | "VERIFIED"
+  | "PUBLISHED"
+  | "PRACTICE_AVAILABLE"
+  | "ARCHIVED";
+
+export type ResultStatusValue = "DRAFT" | "SUBMITTED" | "VERIFIED" | "PUBLISHED";
+
+export type RequestStatusValue =
+  | "PENDING"
+  | "IN_REVIEW"
+  | "RESOLVED"
+  | "REJECTED"
+  | "CLOSED";
+
+export interface StaffStudentRow {
+  id: number;
+  student_code: string;
+  name: string;
+  class_name: string;
+  section_name: string;
+}
+
+export interface StaffResultRow {
+  id: number;
+  student: number;
+  student_name: string;
+  student_code: string;
+  class_name: string;
+  section_name: string;
+  assessment_name: string;
+  assessment_type: string;
+  assessment_type_label: string;
+  assessment_date: string;
+  subject: number;
+  subject_code: string;
+  subject_name: string;
+  subject_color: SubjectColor;
+  obtained_marks: number;
+  total_marks: number;
+  percentage: number;
+  grade: string;
+  status: ResultStatusValue;
+  status_label: string;
+  published_at: string | null;
+  has_topic_breakdown: boolean;
+}
+
+export interface StaffRequestRowDetail {
+  id: number;
+  ticket_id: string;
+  request_type: string;
+  request_type_label: string;
+  subject_line: string;
+  description: string;
+  related_date: string | null;
+  attachment_url: string | null;
+  attachment_name: string;
+  status: RequestStatusValue;
+  status_label: string;
+  admin_response: string;
+  responded_by_name: string;
+  responded_at: string | null;
+  created_at: string;
+  updated_at: string;
+  student_name: string;
+  student_code: string;
+}
+
+export interface StaffRequestQueue {
+  count: number;
+  open_count: number;
+  results: StaffRequestRowDetail[];
+}
+
+export interface AuditEntry {
+  id: number;
+  actor: number | null;
+  actor_name: string;
+  actor_role: string;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  summary: string;
+  metadata: Record<string, unknown>;
+  ip_address: string;
+  created_at: string;
+}
+
+export type AuditPage = Paginated<AuditEntry>;
+
+/**
+ * The legal moves out of each lifecycle state, mirrored from the server's
+ * transition maps. The UI uses this to offer only valid actions; the server
+ * still rejects anything invalid, so this is a convenience and never the
+ * enforcement point.
+ */
+export const PAPER_TRANSITIONS: Record<PaperStatus, PaperStatus[]> = {
+  DRAFT: ["PRACTICE_AVAILABLE", "PUBLISHED", "VERIFIED"],
+  COMPLETED: ["DRAFT"],
+  VERIFIED: ["COMPLETED", "PUBLISHED", "PRACTICE_AVAILABLE"],
+  PUBLISHED: ["VERIFIED", "PRACTICE_AVAILABLE", "ARCHIVED"],
+  PRACTICE_AVAILABLE: ["PUBLISHED", "VERIFIED", "ARCHIVED"],
+  ARCHIVED: [],
+};
+
+export const RESULT_TRANSITIONS: Record<ResultStatusValue, ResultStatusValue[]> = {
+  DRAFT: ["VERIFIED"],
+  SUBMITTED: ["DRAFT"],
+  VERIFIED: ["SUBMITTED", "PUBLISHED"],
+  PUBLISHED: ["VERIFIED"],
+};
+
+export const PAPER_STATUS_LABELS: Record<PaperStatus, string> = {
+  DRAFT: "Draft",
+  COMPLETED: "Completed",
+  VERIFIED: "Verified",
+  PUBLISHED: "Published",
+  PRACTICE_AVAILABLE: "Practice available",
+  ARCHIVED: "Archived",
+};
+
+export const RESULT_STATUS_LABELS: Record<ResultStatusValue, string> = {
+  DRAFT: "Draft",
+  SUBMITTED: "Submitted",
+  VERIFIED: "Verified",
+  PUBLISHED: "Published",
+};
+
+/* -------------------------------------------------------------------------- */
+/* Timetable                                                                   */
 /* -------------------------------------------------------------------------- */
 
 export type SubjectColor =

@@ -15,6 +15,7 @@ import { subjectToken, formatDate, formatPercent, type Tone } from "@/lib/utils"
 import { useResource, useDebounced } from "@/lib/hooks/use-resource";
 import { endpoints } from "@/lib/endpoints";
 import type { AssignmentRow, Paginated } from "@/lib/types";
+import { FloatingOrbs, PageTransitionWrapper } from "@/components/education/education-components";
 
 export default function AssignmentsPage() {
   const [search, setSearch] = useState("");
@@ -46,8 +47,11 @@ export default function AssignmentsPage() {
   ];
 
   return (
-    <PageStack>
-      <PageHeader title="Assignments" description="Your class assignments and submissions." />
+    <div className="relative min-h-[calc(100dvh-4rem)]">
+      <FloatingOrbs opacity={0.04} color="warning" count={4} />
+      <PageTransitionWrapper>
+        <PageStack>
+          <PageHeader title="Assignments" description="Your class assignments and submissions." />
 
       <FilterBar
         onReset={() => { setSearch(""); setStatusFilter(""); setPage(1); }}
@@ -138,6 +142,8 @@ export default function AssignmentsPage() {
         </>
       )}
     </PageStack>
+    </PageTransitionWrapper>
+    </div>
   );
 }
 

@@ -7,58 +7,110 @@
    ========================================================================== */
 
 @theme {
-  /* --- Typography ------------------------------------------------------ */
-  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-manrope), var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  /* --- Typography --------------------------------------------------------
+     ONE family across the whole product: Manrope. Its 800 weight gives
+     confident display headings without a second type voice, its tabular
+     figures keep metrics aligned in tables and stat cards, and it reads
+     as institutional rather than startup-generic.
+     `--font-display` and `--font-body` are kept as aliases so existing
+     `font-display` classes keep working while the family stays unified.
+     ---------------------------------------------------------------------- */
+  --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
 
-  --text-display: clamp(2rem, 1.35rem + 2.4vw, 2.875rem);
-  --text-display--line-height: 1.08;
-  --text-display--letter-spacing: -0.02em;
+  /* Type scale. Each step carries size + line-height + tracking so
+     hierarchy is never font-size alone. */
+  --text-display: clamp(2.125rem, 1.48rem + 2.6vw, 3rem);
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.034em;
 
-  --text-h1: clamp(1.5rem, 1.25rem + 1vw, 1.875rem);
-  --text-h1--line-height: 1.18;
-  --text-h1--letter-spacing: -0.015em;
+  --text-h1: clamp(1.625rem, 1.3rem + 1.15vw, 2.125rem);
+  --text-h1--line-height: 1.14;
+  --text-h1--letter-spacing: -0.026em;
 
-  --text-h2: 1.3125rem;
-  --text-h2--line-height: 1.28;
-  --text-h2--letter-spacing: -0.01em;
+  --text-h2: 1.375rem;
+  --text-h2--line-height: 1.22;
+  --text-h2--letter-spacing: -0.02em;
 
   --text-h3: 1.0625rem;
-  --text-h3--line-height: 1.36;
+  --text-h3--line-height: 1.35;
+  --text-h3--letter-spacing: -0.011em;
+
+  --text-h4: 0.9375rem;
+  --text-h4--line-height: 1.4;
+  --text-h4--letter-spacing: -0.008em;
+
+  /* Numeric emphasis for dashboard figures. Tight, tabular, unapologetic. */
+  --text-metric: clamp(1.75rem, 1.45rem + 1.1vw, 2.25rem);
+  --text-metric--line-height: 1;
+  --text-metric--letter-spacing: -0.036em;
+  --text-metric-sm: 1.375rem;
+  --text-metric-sm--line-height: 1.08;
+  --text-metric-sm--letter-spacing: -0.03em;
 
   --text-body-lg: 1.0625rem;
-  --text-body-lg--line-height: 1.68;
+  --text-body-lg--line-height: 1.62;
+  --text-body-lg--letter-spacing: -0.006em;
 
   --text-body: 0.9375rem;
-  --text-body--line-height: 1.65;
+  --text-body--line-height: 1.6;
 
   --text-small: 0.8125rem;
-  --text-small--line-height: 1.55;
+  --text-small--line-height: 1.5;
 
-  --text-caption: 0.6875rem;
+  --text-caption: 0.75rem;
   --text-caption--line-height: 1.45;
-  --text-caption--letter-spacing: 0.08em;
 
-  /* --- Surfaces -------------------------------------------------------- */
-  --color-canvas: #f4f7f8;
-  --color-canvas-deep: #e8eef1;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f6f5f0;
-  --color-surface-mint: #eef4ee;
-  --color-surface-sunken: #f1efe7;
+  /* Uppercase eyebrow: nav groups, table headers, stat labels. */
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.35;
+  --text-label--letter-spacing: 0.09em;
 
-  /* --- Ink ------------------------------------------------------------- */
-  --color-ink: #102a43;
-  --color-ink-soft: #486078;
-  --color-ink-muted: #6d8294;
-  --color-ink-faint: #9aabb8;
-  --color-ink-inverse: #f7fbfc;
+  --text-nav: 0.875rem;
+  --text-nav--line-height: 1.3;
+
+  --text-table: 0.8125rem;
+  --text-table--line-height: 1.45;
+
+  /* --- Neutral ramp ----------------------------------------------------
+     One cool family end to end. There is deliberately NO warm/beige in
+     this ramp: the page canvas, cards, inputs and dividers all sit in the
+     same hue family so nothing visibly clashes with what's behind it.
+     ---------------------------------------------------------------------- */
+  --color-neutral-50: #f8fafb;
+  --color-neutral-100: #f1f4f6;
+  --color-neutral-150: #e9eef1;
+  --color-neutral-200: #e0e7eb;
+  --color-neutral-300: #cbd5db;
+  --color-neutral-400: #a4b2bc;
+  --color-neutral-500: #7d8f9b;
+  --color-neutral-600: #5f7383;
+  --color-neutral-700: #455a6b;
+  --color-neutral-800: #2c4257;
+  --color-neutral-900: #16304a;
+  --color-neutral-950: #0d2136;
+
+  /* --- Surfaces: a real elevation ladder ------------------------------- */
+  --color-canvas: #f4f7f9;          /* page background, lowest step */
+  --color-canvas-deep: #e9eff3;      /* recessed wells, subtle alt rows */
+  --color-surface: #ffffff;          /* cards, panels */
+  --color-surface-muted: #f5f8fa;    /* quiet tint on a card */
+  --color-surface-sunken: #eef2f5;   /* wells, progress tracks, inputs */
+  --color-surface-mint: #edf4f2;     /* brand-tinted wash, sparingly */
+  --color-surface-float: #f8fafc;    /* floating / frosted surfaces */
+
+  /* --- Ink: a stepped neutral, not a solid black ----------------------- */
+  --color-ink: #0f2740;              /* 100% — headings, primary text */
+  --color-ink-soft: #3f5568;         /* ~78% — body */
+  --color-ink-muted: #64798a;        /* ~60% — secondary text */
+  --color-ink-faint: #8e9fab;        /* ~45% — metadata, placeholders */
+  --color-ink-inverse: #f7fbfd;
 
   /* --- Lines ----------------------------------------------------------- */
-  --color-line: #dce5e9;
-  --color-line-soft: #e8eef1;
-  --color-line-strong: #c6d3da;
+  --color-line: #e1e8ed;             /* default, low contrast */
+  --color-line-soft: #ebf0f4;        /* intra-card dividers */
+  --color-line-strong: #cad5dd;      /* hover / structural */
 
   /* --- Brand / status --------------------------------------------------- */
   --color-brand: #087e8b;
@@ -74,6 +126,16 @@
   --color-info: #35627f;
   --color-info-soft: #e0ebf2;
 
+  /* Semantic aliases keep component intent separate from palette choices. */
+  --color-background: var(--color-canvas);
+  --color-surface-elevated: var(--color-surface);
+  --color-foreground: var(--color-ink);
+  --color-foreground-muted: var(--color-ink-muted);
+  --color-border: var(--color-line);
+  --color-primary: var(--color-brand);
+  --color-primary-hover: var(--color-brand-deep);
+  --color-primary-soft: var(--color-brand-tint);
+
   /* --- Subject accent tokens (stable per subject, set by the API) -------- */
   --color-subject-sage: #3f7359;
   --color-subject-sage-soft: #e3eee6;
@@ -88,18 +150,23 @@
   --color-subject-lilac: #5f5a86;
   --color-subject-lilac-soft: #eae8f2;
 
-  /* --- Radius: consistently rounded curves throughout --- */
-  --radius-control: 0.75rem;
-  --radius-card: 1.5rem;
-  --radius-panel: 1.75rem;
+  /* --- Radius: restrained, consistent --------------------------------
+     Controls are softly rounded, cards are confident but not pill-like.
+     Nothing jumps straight from 8px to 24px.                              */
+  --radius-control: 0.625rem;  /* buttons, inputs, nav items */
+  --radius-card: 0.875rem;     /* cards, tiles */
+  --radius-panel: 1rem;        /* modals, drawers, dropdowns */
+  --radius-rail: 1.25rem;      /* the sidebar rail — distinctive but restrained */
   --radius-pill: 999px;
 
-  /* --- Elevation: soft, flat shadows without hard edges --- */
-  --shadow-hairline: 0 1px 3px rgba(16, 42, 67, 0.06);
-  --shadow-soft: 0 2px 4px rgba(16, 42, 67, 0.05), 0 8px 16px -6px rgba(16, 42, 67, 0.08);
-  --shadow-raised: 0 4px 6px rgba(16, 42, 67, 0.05), 0 16px 32px -12px rgba(16, 42, 67, 0.12);
-  --shadow-overlay: 0 12px 24px -8px rgba(16, 42, 67, 0.14), 0 32px 64px -24px rgba(16, 42, 67, 0.20);
-  --shadow-focus: 0 0 0 3px rgba(8, 126, 139, 0.22);
+  /* --- Elevation: four levels, no more -------------------------------
+     Barely-there hairline, then soft ambient steps. Depth comes mostly
+     from surface contrast, never from a heavy box-shadow.                */
+  --shadow-hairline: 0 1px 2px rgba(15, 39, 64, 0.05);
+  --shadow-soft: 0 1px 2px rgba(15, 39, 64, 0.04), 0 6px 16px -8px rgba(15, 39, 64, 0.10);
+  --shadow-raised: 0 2px 4px rgba(15, 39, 64, 0.05), 0 14px 30px -14px rgba(15, 39, 64, 0.16);
+  --shadow-overlay: 0 8px 20px -8px rgba(15, 39, 64, 0.16), 0 30px 60px -24px rgba(15, 39, 64, 0.22);
+  --shadow-focus: 0 0 0 3px rgba(8, 126, 139, 0.24);
 
   /* --- Motion ----------------------------------------------------------- */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -109,6 +176,47 @@
   --animate-slide-in: slide-in 0.26s var(--ease-out-soft) both;
   --animate-progress: progress 0.9s var(--ease-out-soft) both;
   --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   Component-level tokens
+   These are only ever read through `var()` — in base/component rules and in
+   arbitrary values like `bg-[var(--frost-topbar)]`. They deliberately live
+   outside `@theme` so Tailwind can never tree-shake them away; anything in
+   `@theme` is treated as a candidate for utility generation and pruning.
+   ========================================================================== */
+:root {
+  /* --- Frosted surfaces (accent only, never the whole UI) ----------- */
+  --frost-sidebar: rgba(255, 255, 255, 0.82);
+  --frost-topbar: rgba(248, 250, 251, 0.78);
+  --frost-menu: rgba(255, 255, 255, 0.9);
+  --frost-border: rgba(255, 255, 255, 0.65);
+  --blur-rail: 16px;
+  --blur-menu: 14px;
+
+  /* --- On-dark surfaces (login / marketing panels) -------------------
+     Derived from the same ink + brand family so dark panels read as the
+     brand inverted rather than a separate palette invented for one screen. */
+  --color-on-dark: #0f2740;          /* panel base — equals --color-ink */
+  --color-on-dark-raise: #14405c;    /* decorative rings, subtle relief */
+  --color-on-dark-accent: #7fd0d6;   /* brand lifted for contrast on dark */
+  --color-on-dark-text: #c3d6e0;     /* muted body copy on dark */
+
+  /* --- Opacity hierarchy: never applied to important content -------- */
+  --opacity-full: 1;
+  --opacity-secondary: 0.72;
+  --opacity-meta: 0.58;
+  --opacity-disabled: 0.45;
+  --opacity-decorative: 0.32;
+
+  /* --- Icon system: one stroke weight, one grid ---------------------- */
+  --icon-stroke: 1.75;
+  --icon-size-xs: 0.75rem;   /* 12 — inline, badges */
+  --icon-size-sm: 0.875rem;  /* 14 — buttons, small UI */
+  --icon-size-md: 1rem;      /* 16 — inputs, list rows */
+  --icon-size-lg: 1.125rem;  /* 18 — sidebar nav */
+  --icon-size-xl: 1.25rem;   /* 20 — toolbar, feature */
+  --icon-size-2xl: 1.5rem;   /* 24 — large feature */
 }
 
 @keyframes fade-up {
@@ -135,18 +243,6 @@
   0%, 100% { opacity: 0.55; }
   50% { opacity: 0.9; }
 }
-@keyframes float {
-  0%, 100% { transform: translateY(0) translateX(0); }
-  25% { transform: translateY(-12px) translateX(6px); }
-  50% { transform: translateY(6px) translateX(-8px); }
-  75% { transform: translateY(-8px) translateX(4px); }
-}
-@keyframes blob {
-  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: translate(0, 0) scale(1); }
-  25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: translate(20px, -20px) scale(1.05); }
-  50% { border-radius: 50% 30% 60% 50% / 30% 50% 60% 40%; transform: translate(-15px, 25px) scale(0.95); }
-  75% { border-radius: 40% 50% 30% 60% / 60% 40% 50% 30%; transform: translate(10px, 15px) scale(1.02); }
-}
 
 /* ==========================================================================
    Base
@@ -155,6 +251,7 @@
 @layer base {
   :root {
     --sidebar-width: 16.5rem;
+    --rail-width: 17rem;
     --topbar-height: 4rem;
     color-scheme: light;
   }
@@ -173,17 +270,36 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: var(--text-body);
-    line-height: 1.65;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "cv11", "ss01";
+    /* Manrope-specific features: correct alignment forms + tabular figures
+       available where they're needed (tables, metrics). */
+    font-feature-settings: "ss01", "kern", "liga";
+    font-variation-settings: normal;
   }
 
+  /* Weight ladder is intentional, not blanket-bold:
+     800 display/H1 · 700 H2/section · 600 H3/label/nav · 400-500 body. */
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    font-weight: 600;
+    font-weight: 700;
     color: var(--color-ink);
     text-wrap: balance;
+  }
+  h1 { font-weight: 800; }
+  h2 { font-weight: 700; }
+  h3, h4 { font-weight: 600; }
+
+  /* Icons: one stroke weight, aligned to a single scale. Hand-off to
+     Lucide defaults, but consistent across any inline SVG too. */
+  svg[aria-hidden] {
+    stroke-width: var(--icon-stroke);
+  }
+
+  /* Numeric content gets figures aligned by default where it matters. */
+  table, [data-numeric] {
+    font-variant-numeric: tabular-nums;
   }
 
   p { text-wrap: pretty; }
@@ -217,11 +333,21 @@
 }
 
 @layer components {
-  /* Subtle mint wash used to lift a section off the canvas without a shadow. */
+  /* Cool wash used to lift a section off the canvas without a shadow.
+     Radial so it reads as light falling across the surface, not a box. */
   .surface-tint {
     background:
-      radial-gradient(120% 140% at 0% 0%, #f1f7f1 0%, rgba(250, 249, 245, 0) 62%),
+      radial-gradient(130% 150% at 0% 0%, #f4f9fb 0%, rgba(244, 249, 251, 0) 64%),
       var(--color-surface);
+  }
+
+  /* Frosted panel: blur is an accent here, never a full-UI treatment.
+     Contrast is protected by keeping the base colour high-opacity. */
+  .surface-frost {
+    background: var(--frost-menu);
+    -webkit-backdrop-filter: blur(var(--blur-menu)) saturate(1.4);
+    backdrop-filter: blur(var(--blur-menu)) saturate(1.4);
+    border: 1px solid rgba(203, 213, 219, 0.6);
   }
 
   .hairline-bottom {
@@ -233,13 +359,6 @@
     transform-origin: left center;
   }
 
-  /* Floating animations for educational backgrounds */
-  .animate-float {
-    animation: float 20s ease-in-out infinite;
-  }
-  .animate-blob {
-    animation: blob 25s ease-in-out infinite;
-  }
   .animate-fade-in-up {
     animation: fade-up 0.6s var(--ease-out-soft) both;
   }
@@ -253,22 +372,6 @@
   .animate-stagger-5 { animation-delay: 0.5s; }
   .animate-stagger-6 { animation-delay: 0.6s; }
 
-  /* 3D card hover effect */
-  .card-3d {
-    transform-style: preserve-3d;
-    transition: transform 0.3s var(--ease-out-soft), box-shadow 0.3s var(--ease-out-soft);
-  }
-  .card-3d:hover {
-    transform: translateY(-4px) rotateX(1deg);
-    box-shadow: var(--shadow-raised);
-  }
-
-  /* Glassmorphism effect for special cards */
-  .glass {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
 
   /* Smooth page transitions */
   .page-enter {
@@ -319,14 +422,9 @@
   background: radial-gradient(120% 140% at 0% 0%, var(--color-surface-mint) 0%, var(--color-canvas) 60%);
 }
 
-@utility shadow-intense {
-  box-shadow: 0 8px 16px -6px rgba(26, 31, 27, 0.08), 0 24px 48px -12px rgba(26, 31, 27, 0.14);
+/* The rail: a distinct surface sitting inside the shell rather than a
+   browser-like vertical bar. Clean on the left edge, rounded on the right. */
+@utility rail-shape {
+  border-radius: 0 var(--radius-rail) var(--radius-rail) 0;
 }
 
-@utility glass-card {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  box-shadow: 0 8px 32px 0 rgba(26, 31, 27, 0.07);
-}

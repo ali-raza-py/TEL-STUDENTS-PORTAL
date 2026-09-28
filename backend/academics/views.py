@@ -247,9 +247,11 @@ class TimetableTodayView(APIView):
                             0,
                             int(
                                 (
-                                    timezone.datetime.combine(
-                                        now.date() + timedelta(days=(next_entry.day_of_week - weekday) % 7),
-                                        next_entry.start_time,
+                                    timezone.make_aware(
+                                        timezone.datetime.combine(
+                                            now.date() + timedelta(days=(next_entry.day_of_week - weekday) % 7),
+                                            next_entry.start_time,
+                                        )
                                     )
                                     - now
                                 ).total_seconds()

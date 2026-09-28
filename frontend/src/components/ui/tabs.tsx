@@ -34,8 +34,8 @@ export function TabsTrigger({
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        "whitespace-nowrap rounded-pill px-4 py-1.5 text-small font-medium text-ink-muted transition-colors duration-200",
-        "hover:text-ink data-[state=active]:bg-surface data-[state=active]:text-brand-deep data-[state=active]:shadow-hairline",
+        "whitespace-nowrap rounded-pill px-4 py-2 text-small font-semibold text-ink-muted transition-colors duration-200",
+        "hover:text-ink data-[state=active]:bg-surface data-[state=active]:text-brand-deep data-[state=active]:shadow-[var(--shadow-hairline)]",
         className,
       )}
       {...props}

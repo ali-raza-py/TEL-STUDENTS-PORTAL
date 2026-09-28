@@ -89,7 +89,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           >
             <span className="mt-0.5 shrink-0">{toneStyles[item.tone].icon}</span>
             <div className="min-w-0 flex-1">
-              <ToastPrimitive.Title className="text-body font-medium text-ink">
+              <ToastPrimitive.Title className="text-body font-semibold text-ink">
                 {item.title}
               </ToastPrimitive.Title>
               {item.description ? (

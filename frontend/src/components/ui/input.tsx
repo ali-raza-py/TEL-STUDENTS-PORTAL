@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -18,7 +19,7 @@ export function Field({ label, htmlFor, hint, error, required, className, childr
     <div className={cn("flex flex-col gap-1.5", className)}>
       <label
         htmlFor={htmlFor}
-        className="text-small font-medium text-ink-soft"
+        className="text-small font-semibold text-ink-soft"
       >
         {label}
         {required ? <span className="ml-1 text-danger">*</span> : null}
@@ -39,7 +40,7 @@ const controlBase = [
   "w-full rounded-control border bg-surface px-3.5 text-body text-ink",
   "placeholder:text-ink-faint",
   "transition-[border-color,box-shadow] duration-200",
-  "focus:outline-none focus-visible:border-brand focus-visible:shadow-focus",
+  "focus:outline-none focus-visible:border-brand focus-visible:shadow-[var(--shadow-focus)]",
   "disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-ink-faint",
   "aria-[invalid=true]:border-danger aria-[invalid=true]:shadow-none",
 ].join(" ");
@@ -111,20 +112,10 @@ export const Select = React.forwardRef<
       >
         {children}
       </select>
-      <svg
+      <ChevronDown
         aria-hidden
-        viewBox="0 0 20 20"
-        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint"
-      >
-        <path
-          d="M6 8l4 4 4-4"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+        className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-ink-faint"
+      />
     </div>
   );
 });
@@ -137,8 +128,8 @@ export function Checkbox({
     <input
       type="checkbox"
       className={cn(
-        "h-4 w-4 shrink-0 cursor-pointer rounded-[4px] border-line-strong text-brand accent-[#2f6b4f]",
-        "focus-visible:shadow-focus",
+        "h-4 w-4 shrink-0 cursor-pointer rounded-[4px] border-line-strong text-brand accent-brand",
+        "focus-visible:shadow-[var(--shadow-focus)]",
         className,
       )}
       {...props}
@@ -169,7 +160,7 @@ export function RadioCard({
         type="radio"
         checked={checked}
         disabled={disabled}
-        className="mt-0.5 h-4 w-4 shrink-0 accent-[#2f6b4f]"
+        className="mt-0.5 h-4 w-4 shrink-0 accent-brand"
         {...props}
       />
       <span className="min-w-0 flex-1 text-body text-ink">{children}</span>

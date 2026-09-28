@@ -29,11 +29,11 @@ export function PageHeader({
     >
       <div className="min-w-0">
         {eyebrow ? (
-          <p className="mb-1.5 text-caption font-semibold uppercase tracking-[0.1em] text-ink-faint">
+          <p className="mb-1.5 text-label font-bold uppercase text-ink-faint">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="font-display text-h1 text-ink">{title}</h1>
+        <h1 className="font-display text-h1 font-extrabold tracking-[-0.026em] text-ink">{title}</h1>
         {description ? (
           <p className="mt-2 max-w-2xl text-body text-ink-muted">{description}</p>
         ) : null}
@@ -63,7 +63,7 @@ export function SectionHeading({
   return (
     <div className={cn("flex flex-wrap items-end justify-between gap-3", className)}>
       <div className="min-w-0">
-        <Tag className="font-display text-h2 text-ink">{title}</Tag>
+        <Tag className="font-display text-h2 font-bold tracking-[-0.02em] text-ink">{title}</Tag>
         {description ? <p className="mt-1 text-small text-ink-muted">{description}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}

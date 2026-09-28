@@ -11,7 +11,7 @@ import { subjectToken } from "@/lib/utils";
 import { useResource } from "@/lib/hooks/use-resource";
 import { endpoints } from "@/lib/endpoints";
 import type { SubjectOffering } from "@/lib/types";
-import { FloatingOrbs, PageTransitionWrapper } from "@/components/education/education-components";
+import { PageTransitionWrapper } from "@/components/education/education-components";
 
 export default function SubjectsPage() {
   const {
@@ -31,7 +31,6 @@ export default function SubjectsPage() {
 
   return (
     <div className="relative min-h-[calc(100dvh-4rem)]">
-      <FloatingOrbs opacity={0.04} color="brand" count={4} />
       <PageTransitionWrapper>
         <PageStack>
           <PageHeader

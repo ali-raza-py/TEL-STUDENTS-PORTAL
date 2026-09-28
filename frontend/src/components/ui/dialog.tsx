@@ -51,7 +51,7 @@ export function DialogContent({
       >
         <header className="flex items-start justify-between gap-4 border-b border-line-soft px-6 py-5">
           <div className="min-w-0">
-            <DialogPrimitive.Title className="font-display text-h2 text-ink">
+            <DialogPrimitive.Title className="font-display text-h2 font-bold tracking-[-0.02em] text-ink">
               {title}
             </DialogPrimitive.Title>
             {description ? (

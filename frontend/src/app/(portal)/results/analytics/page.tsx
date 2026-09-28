@@ -149,11 +149,11 @@ function TopicTable({ topics }: { topics: TopicAnalysisResponse["topics"] }) {
       <table className="w-full min-w-[40rem] border-collapse text-left">
         <thead className="border-b border-line bg-surface-muted/70">
           <tr>
-            <th className="px-4 py-3 text-caption font-semibold uppercase text-ink-faint">Subject</th>
-            <th className="px-4 py-3 text-caption font-semibold uppercase text-ink-faint">Chapter</th>
-            <th className="px-4 py-3 text-caption font-semibold uppercase text-ink-faint">Topic</th>
-            <th className="px-4 py-3 text-caption font-semibold uppercase text-ink-faint">Status</th>
-            <th className="px-4 py-3 text-caption font-semibold uppercase text-ink-faint">% Score</th>
+            <th className="px-4 py-3 text-label font-bold uppercase text-ink-faint">Subject</th>
+            <th className="px-4 py-3 text-label font-bold uppercase text-ink-faint">Chapter</th>
+            <th className="px-4 py-3 text-label font-bold uppercase text-ink-faint">Topic</th>
+            <th className="px-4 py-3 text-label font-bold uppercase text-ink-faint">Status</th>
+            <th className="px-4 py-3 text-label font-bold uppercase text-ink-faint">% Score</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-line-soft">

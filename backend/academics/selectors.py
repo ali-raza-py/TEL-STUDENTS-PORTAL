@@ -193,6 +193,34 @@ def is_staff(user) -> bool:
     return bool(user and user.is_authenticated and (user.role in {Role.ADMIN, Role.TEACHER} or user.is_superuser))
 
 
+def next_period(entries, now):
+    """
+    The next period in a weekly cycle, wrapping from the end of the week.
+
+    ``entries`` must be ordered by ``day_of_week`` then ``start_time``. The wrap
+    matters: a timetable runs Monday to Friday, so on a Sunday there is nothing
+    later today and nothing later this week — returning ``None`` there would
+    hide Monday's first class from every dashboard.
+    """
+
+    ordered = list(entries)
+    if not ordered:
+        return None
+    weekday = now.weekday()
+    for entry in ordered:
+        if entry.day_of_week > weekday:
+            return entry
+        if entry.day_of_week == weekday and entry.end_time > now.time():
+            return entry
+    return ordered[0]
+
+
+def days_until_period(entry, now) -> int:
+    """Whole days from today until ``entry`` next runs; ``0`` means today."""
+
+    return (entry.day_of_week - now.weekday()) % 7
+
+
 def staff_scope_filter(user, queryset: QuerySet) -> QuerySet:
     """Teachers see their own campus; admins see everything."""
     if user.is_superuser or user.role == Role.ADMIN:

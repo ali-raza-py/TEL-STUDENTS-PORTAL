@@ -14,6 +14,7 @@ import { useResource, useDebounced } from "@/lib/hooks/use-resource";
 import { endpoints } from "@/lib/endpoints";
 import type { AttendanceSummary, AttendanceRecordRow, SubjectAttendance, Paginated } from "@/lib/types";
 import { useState, useMemo } from "react";
+import { FloatingOrbs, PageTransitionWrapper } from "@/components/education/education-components";
 
 export default function AttendancePage() {
   const [page, setPage] = useState(1);
@@ -35,8 +36,11 @@ export default function AttendancePage() {
   if (!summary) return null;
 
   return (
-    <PageStack>
-      <PageHeader title="Attendance" description="Your attendance overview and record history." />
+    <div className="relative min-h-[calc(100dvh-4rem)]">
+      <FloatingOrbs opacity={0.04} color="danger" count={4} />
+      <PageTransitionWrapper>
+        <PageStack>
+          <PageHeader title="Attendance" description="Your attendance overview and record history." />
 
       {/* Summary card */}
       <Card className="p-6">
@@ -182,6 +186,8 @@ export default function AttendancePage() {
         </>
       )}
     </PageStack>
+    </PageTransitionWrapper>
+    </div>
   );
 }
 
